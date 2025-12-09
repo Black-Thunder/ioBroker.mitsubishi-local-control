@@ -94,6 +94,19 @@ class MitsubishiLocalControl extends utils.Adapter {
         try {
           if (id.endsWith("powerOnOff")) {
             await client.controller.setPower(state.val);
+          } else if (id.endsWith("fineTemperature")) {
+            await client.controller.setTemperature(state.val);
+          } else if (id.endsWith("driveMode")) {
+            await client.controller.setMode(state.val);
+          } else if (id.endsWith("windSpeed")) {
+            await client.controller.setFanSpeed(state.val);
+          } else if (id.endsWith("verticalWindDirection")) {
+            await client.controller.setVerticalVane(state.val);
+          } else if (id.endsWith("horizontalWindDirection")) {
+            await client.controller.setHorizontalVane(state.val);
+          } else {
+            this.log.warn(`Unhandled command for state ${id}`);
+            return;
           }
         } catch (err) {
           this.log.error(`Error executing command for ${mac}: ${err}`);
@@ -246,7 +259,7 @@ class MitsubishiLocalControl extends utils.Adapter {
             if (keyLower.includes("temperature")) {
               role = "value.temperature";
               unit = "\xB0C";
-              if (keyLower == "fineTemperature") {
+              if (keyLower.includes("finetemperature")) {
                 write = true;
               }
             } else if (keyLower.includes("power") || keyLower.includes("energy")) {
