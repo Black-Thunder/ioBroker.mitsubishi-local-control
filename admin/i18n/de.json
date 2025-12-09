@@ -1,5 +1,5 @@
 {
-	"Clients": "Geräte",
+	"Devices": "Geräte",
 	"Enter your desired polling interval (in seconds) here to query data from the devices": "Geben Sie hier Ihr gewünschtes Abfrageintervall (in Sekunden) ein, um Daten von den Geräten abzufragen",
 	"Friendly name of the device": "Anzeigename des Geräts",
 	"IP Address": "IP-Adresse",

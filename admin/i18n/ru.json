@@ -1,5 +1,5 @@
 {
-	"Clients": "Клиенты",
+	"Devices": "Устройства",
 	"Enter your desired polling interval (in seconds) here to query data from the devices": "Введите здесь желаемый интервал опроса (в секундах), чтобы запросить данные с устройств.",
 	"Friendly name of the device": "Понятное имя устройства",
 	"IP Address": "IP-адрес",

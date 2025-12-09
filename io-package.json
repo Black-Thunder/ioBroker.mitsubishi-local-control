@@ -83,13 +83,13 @@
 		]
 	},
 	"native": {
-		"clients": [
+		"devices": [
 			{
 				"name": "",
 				"ip": ""
 			}
 		],
-		"pollingInterval": 10
+		"pollingInterval": 60
 	},
 	"objects": [],
 	"instanceObjects": [

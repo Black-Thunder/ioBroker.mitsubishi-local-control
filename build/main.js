@@ -26,7 +26,7 @@ var import_utils = require("./lib/mitsubishi/utils");
 var import_mitsubishiController = require("./lib/mitsubishi/mitsubishiController");
 var import_types = require("./lib/mitsubishi/types");
 class MitsubishiLocalControl extends utils.Adapter {
-  clients = [];
+  devices = [];
   constructor(options = {}) {
     super({
       ...options,
@@ -42,8 +42,12 @@ class MitsubishiLocalControl extends utils.Adapter {
   async onReady() {
     var _a;
     await this.setAdapterConnectionState(false);
-    this.log.debug(`Configured Polling Interval: ${this.config.pollingInterval} seconds`);
-    this.clients = ((_a = this.config.clients) != null ? _a : []).map((c) => ({
+    if (!this.validateConfig()) {
+      this.log.error("Invalid configuration detected. Stopping adapter.");
+      return;
+    }
+    this.log.info(`Configuring ${this.config.devices.length} devices...`);
+    this.devices = ((_a = this.config.devices) != null ? _a : []).map((c) => ({
       ...c,
       controller: import_mitsubishiController.MitsubishiController.create(c.ip, this.log)
     }));
@@ -85,25 +89,25 @@ class MitsubishiLocalControl extends utils.Adapter {
           this.log.error(`Unable to extract MAC address from state ID: ${id}`);
           return;
         }
-        const client = this.getClientByMac(mac);
-        if (!client) {
-          this.log.error(`No client found for MAC ${mac}`);
+        const device = this.getDeviceByMac(mac);
+        if (!device) {
+          this.log.error(`No device found for MAC ${mac}`);
           return;
         }
-        this.log.debug(`Command on ${id} \u2192 forwarding to client ${client.name} (${mac})`);
+        this.log.debug(`Command on ${id} \u2192 forwarding to device ${device.name} (${mac})`);
         try {
           if (id.endsWith("powerOnOff")) {
-            await client.controller.setPower(state.val);
+            await device.controller.setPower(state.val);
           } else if (id.endsWith("fineTemperature")) {
-            await client.controller.setTemperature(state.val);
+            await device.controller.setTemperature(state.val);
           } else if (id.endsWith("driveMode")) {
-            await client.controller.setMode(state.val);
+            await device.controller.setMode(state.val);
           } else if (id.endsWith("windSpeed")) {
-            await client.controller.setFanSpeed(state.val);
+            await device.controller.setFanSpeed(state.val);
           } else if (id.endsWith("verticalWindDirection")) {
-            await client.controller.setVerticalVane(state.val);
+            await device.controller.setVerticalVane(state.val);
           } else if (id.endsWith("horizontalWindDirection")) {
-            await client.controller.setHorizontalVane(state.val);
+            await device.controller.setHorizontalVane(state.val);
           } else {
             this.log.warn(`Unhandled command for state ${id}`);
             return;
@@ -116,41 +120,65 @@ class MitsubishiLocalControl extends utils.Adapter {
       this.log.silly(`state ${id} deleted`);
     }
   }
+  validateConfig() {
+    this.log.debug("Checking adapter settings...");
+    if (this.config.pollingInterval < 15) {
+      this.config.pollingInterval = 15;
+      this.log.warn("Polling interval can't be set lower than 15 seconds. Now set to 15 seconds.");
+    }
+    if (!this.config.devices || !Array.isArray(this.config.devices)) {
+      this.log.error("No valid devices configured. Please add at least one device.");
+      return false;
+    }
+    const invalidDevices = this.config.devices.filter((c) => !c.name || !c.ip || !c.name.trim() || !c.ip.trim());
+    if (invalidDevices.length > 0) {
+      this.config.devices = this.config.devices.filter((c) => c.name && c.ip);
+      if (this.config.devices.length === 0) {
+        this.log.error("No valid devices configured. Please add at least one device.");
+        return false;
+      } else {
+        this.log.warn("Some device entries are empty and will be ignored.");
+      }
+    } else {
+      this.log.error("No valid devices configured. Please add at least one device.");
+    }
+    return true;
+  }
   async setAdapterConnectionState(isConnected) {
     await this.setStateChangedAsync("info.connection", isConnected, true);
     this.setForeignState(`system.adapter.${this.namespace}.connected`, isConnected, true);
   }
-  getClientByMac(mac) {
+  getDeviceByMac(mac) {
     const noColMac = String(mac).toLowerCase().replace(/[^0-9a-f]/g, "");
     if (noColMac.length !== 12) {
       return void 0;
     }
     const colMac = noColMac.match(/.{1,2}/g).join(":");
-    return this.clients.find((c) => {
+    return this.devices.find((c) => {
       var _a;
       return ((_a = c.controller.parsedDeviceState) == null ? void 0 : _a.mac) === colMac;
     });
   }
   async startPolling() {
     const interval = this.config.pollingInterval * 1e3;
-    for (const client of this.clients) {
+    for (const device of this.devices) {
       const poll = async () => {
         try {
-          this.log.debug(`Polling ${client.name} (${client.ip}) ...`);
-          const parsed = await client.controller.fetchStatus();
-          await this.updateDeviceStates(this, parsed, client.name);
+          this.log.debug(`Polling ${device.name} (${device.ip}) ...`);
+          const parsed = await device.controller.fetchStatus();
+          await this.updateDeviceStates(this, parsed, device.name);
         } catch (err) {
-          this.log.error(`Polling error for ${client.name}: ${err}`);
+          this.log.error(`Polling error for ${device.name}: ${err}`);
         } finally {
-          client.pollingJob = setTimeout(poll, interval);
+          device.pollingJob = setTimeout(poll, interval);
         }
       };
       await poll();
-      this.log.debug(`Started polling timer for device ${client.name}.`);
     }
+    this.log.info(`Started polling all devices every ${this.config.pollingInterval} seconds.`);
   }
   stopPolling() {
-    this.clients.forEach((c) => {
+    this.devices.forEach((c) => {
       if (c.pollingJob) {
         clearTimeout(c.pollingJob);
         this.log.debug(`Cleared polling timer for device ${c.name}.`);
@@ -294,11 +322,11 @@ class MitsubishiLocalControl extends utils.Adapter {
       await adapter.setState(id, { val: value, ack: true });
     }
   }
-  async updateDeviceStates(adapter, parsedState, clientName) {
+  async updateDeviceStates(adapter, parsedState, deviceName) {
     const deviceId = `devices.${parsedState.mac.replace(/:/g, "")}`;
     await adapter.setObjectNotExistsAsync(`${deviceId}`, {
       type: "channel",
-      common: { name: `${clientName}` },
+      common: { name: `${deviceName}` },
       native: {}
     });
     await this.writeRecursive(adapter, `${deviceId}`, parsedState);

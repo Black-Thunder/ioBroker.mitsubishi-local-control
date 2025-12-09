@@ -1,5 +1,5 @@
 {
-	"Clients": "Clientela",
+	"Devices": "Dispositivos",
 	"Enter your desired polling interval (in seconds) here to query data from the devices": "Ingrese aquí el intervalo de sondeo deseado (en segundos) para consultar datos de los dispositivos",
 	"Friendly name of the device": "Nombre descriptivo del dispositivo",
 	"IP Address": "Dirección IP",

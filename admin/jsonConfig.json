@@ -2,21 +2,23 @@
 	"i18n": true,
 	"type": "panel",
 	"items": {
-		"clients": {
+		"devices": {
 			"type": "table",
-			"label": "Clients",
+			"label": "Devices",
 			"items": [
 				{
 					"type": "text",
 					"attr": "name",
 					"label": "Name",
-					"tooltip": "Friendly name of the device"
+					"tooltip": "Friendly name of the device",
+					"allowEmpty": false
 				},
 				{
 					"type": "text",
 					"attr": "ip",
 					"label": "IP Address",
-					"tooltip": "IP address of the Mitsubishi device"
+					"tooltip": "IP address of the Mitsubishi device",
+					"allowEmpty": false
 				}
 			],
 			"xs": 12,

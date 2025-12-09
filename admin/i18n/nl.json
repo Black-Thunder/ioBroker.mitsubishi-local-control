@@ -1,5 +1,5 @@
 {
-	"Clients": "Klanten",
+	"Devices": "Apparaten",
 	"Enter your desired polling interval (in seconds) here to query data from the devices": "Voer hier uw gewenste polling-interval (in seconden) in om gegevens van de apparaten op te vragen",
 	"Friendly name of the device": "Beschrijvende naam van het apparaat",
 	"IP Address": "IP-adres",

@@ -1,5 +1,5 @@
 {
-	"Clients": "客户",
+	"Devices": "设备",
 	"Enter your desired polling interval (in seconds) here to query data from the devices": "在此输入您想要的轮询间隔（以秒为单位）以查询来自设备的数据",
 	"Friendly name of the device": "设备的友好名称",
 	"IP Address": "IP地址",
