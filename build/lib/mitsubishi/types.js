@@ -220,7 +220,7 @@ class GeneralStates {
   power = false;
   operationMode = 8 /* AUTO */;
   coarseTemperature = 22;
-  fineTemperature = 22;
+  targetTemperature = 22;
   fanSpeed = 0 /* AUTO */;
   vaneVerticalDirection = 0 /* AUTO */;
   remoteLock = 0 /* UNLOCKED */;
@@ -230,7 +230,7 @@ class GeneralStates {
   windAndWindBreakDirect = 0;
   iSeeSensor = true;
   wideVaneAdjustment = false;
-  buzzer = false;
+  triggerBuzzer = false;
   constructor(other) {
     if (other) {
       Object.assign(this, other);
@@ -259,7 +259,7 @@ class GeneralStates {
     obj.remoteLock = data[13];
     obj.vaneHorizontalDirection = data[15] & 15;
     obj.wideVaneAdjustment = (data[15] & 240) === 128;
-    obj.fineTemperature = data[16] !== 0 ? (data[16] - 128) / 2 : null;
+    obj.targetTemperature = data[16] !== 0 ? (data[16] - 128) / 2 : null;
     obj.dehumSetting = data[17];
     obj.isPowerSaving = data[18] > 0;
     obj.windAndWindBreakDirect = data[19];
@@ -267,10 +267,10 @@ class GeneralStates {
   }
   get temperature() {
     var _a;
-    return (_a = this.fineTemperature) != null ? _a : this.coarseTemperature;
+    return (_a = this.targetTemperature) != null ? _a : this.coarseTemperature;
   }
   set temperature(v) {
-    this.fineTemperature = v;
+    this.targetTemperature = v;
     this.coarseTemperature = Math.floor(v);
   }
   // generate_general_command -> returns Buffer
@@ -294,7 +294,7 @@ class GeneralStates {
     body[15] = this.remoteLock & 255;
     body[16] = 0;
     body[17] = this.vaneHorizontalDirection & 255;
-    body[18] = this.fineTemperature !== null ? 128 + Math.floor(this.fineTemperature * 2) & 255 : 0;
+    body[18] = this.targetTemperature !== null ? 128 + Math.floor(this.targetTemperature * 2) & 255 : 0;
     body[19] = 65;
     const fcc = (0, import_utils.calcFcc)(body);
     return Buffer.concat([Buffer.from([252]), body, Buffer.from([fcc])]);

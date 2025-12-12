@@ -78,8 +78,8 @@ class MitsubishiChangeSet {
     this.desiredState.remoteLock = remoteLock;
     this.changes |= import_types.Controls.RemoteLock;
   }
-  setBuzzer(buzzer) {
-    this.desiredState.buzzer = buzzer;
+  triggerBuzzer() {
+    this.desiredState.triggerBuzzer = true;
     this.changes08 |= import_types.Controls08.Buzzer;
   }
 }
@@ -272,9 +272,9 @@ class MitsubishiController {
     changeset.setPowerSaving(enabled);
     return this.applyChangeset(changeset);
   }
-  async setBuzzer(enabled = true) {
+  async triggerBuzzer() {
     const changeset = await this.getChangeset();
-    changeset.setBuzzer(enabled);
+    changeset.triggerBuzzer();
     return this.applyChangeset(changeset);
   }
   async setRemoteLock(lockFlags) {

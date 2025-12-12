@@ -206,7 +206,7 @@ export class GeneralStates {
 	power: boolean = false;
 	operationMode: OperationMode = OperationMode.AUTO;
 	coarseTemperature: number = 22;
-	fineTemperature: number | null = 22.0;
+	targetTemperature: number | null = 22.0;
 	fanSpeed: FanSpeed = FanSpeed.AUTO;
 	vaneVerticalDirection: VaneVerticalDirection = VaneVerticalDirection.AUTO;
 	remoteLock: RemoteLock = RemoteLock.UNLOCKED;
@@ -216,7 +216,7 @@ export class GeneralStates {
 	windAndWindBreakDirect: number = 0;
 	iSeeSensor: boolean = true;
 	wideVaneAdjustment: boolean = false;
-	buzzer: boolean = false;
+	triggerBuzzer: boolean = false;
 
 	constructor(other?: GeneralStates) {
 		if (other) {
@@ -250,7 +250,7 @@ export class GeneralStates {
 		obj.remoteLock = data[13];
 		obj.vaneHorizontalDirection = data[15] & 0x0f;
 		obj.wideVaneAdjustment = (data[15] & 0xf0) === 0x80;
-		obj.fineTemperature = data[16] !== 0x00 ? (data[16] - 0x80) / 2 : null;
+		obj.targetTemperature = data[16] !== 0x00 ? (data[16] - 0x80) / 2 : null;
 		obj.dehumSetting = data[17];
 		obj.isPowerSaving = data[18] > 0;
 		obj.windAndWindBreakDirect = data[19];
@@ -258,11 +258,11 @@ export class GeneralStates {
 	}
 
 	get temperature(): number {
-		return this.fineTemperature ?? this.coarseTemperature;
+		return this.targetTemperature ?? this.coarseTemperature;
 	}
 
 	set temperature(v: number) {
-		this.fineTemperature = v;
+		this.targetTemperature = v;
 		this.coarseTemperature = Math.floor(v);
 	}
 
@@ -287,7 +287,7 @@ export class GeneralStates {
 		body[15] = this.remoteLock & 0xff;
 		body[16] = 0;
 		body[17] = (this.vaneHorizontalDirection as unknown as number) & 0xff;
-		body[18] = this.fineTemperature !== null ? (0x80 + Math.floor(this.fineTemperature * 2)) & 0xff : 0x00;
+		body[18] = this.targetTemperature !== null ? (0x80 + Math.floor(this.targetTemperature * 2)) & 0xff : 0x00;
 		body[19] = 0x41;
 
 		const fcc = calcFcc(body);

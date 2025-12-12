@@ -109,7 +109,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 				try {
 					if (id.endsWith("power")) {
 						await device.controller.setPower(state.val as boolean);
-					} else if (id.endsWith("fineTemperature")) {
+					} else if (id.endsWith("targetTemperature")) {
 						await device.controller.setTemperature(state.val as number);
 					} else if (id.endsWith("operationMode")) {
 						await device.controller.setMode(state.val as number);
@@ -121,8 +121,9 @@ class MitsubishiLocalControl extends utils.Adapter {
 						await device.controller.setHorizontalVane(state.val as number);
 					} else if (id.endsWith("remoteLock")) {
 						await device.controller.setRemoteLock(state.val as number);
-					} else if (id.endsWith("buzzer")) {
-						await device.controller.setBuzzer(state.val as boolean);
+					} else if (id.endsWith("triggerBuzzer")) {
+						await device.controller.triggerBuzzer();
+						await this.setState(id, state.val, true); // set ACK to true
 					} else {
 						this.log.warn(`Unhandled command for state ${id}`);
 						return;
@@ -270,16 +271,9 @@ class MitsubishiLocalControl extends utils.Adapter {
 	async writeRecursive(adapter: MitsubishiLocalControl, parentId: string, obj: any): Promise<void> {
 		for (const key of Object.keys(obj)) {
 			const value = obj[key];
-			const id = `${parentId}.${key}`;
 
 			if (value && typeof value === "object" && !(value instanceof Date) && !Buffer.isBuffer(value)) {
-				// Channel
-				await adapter.setObjectNotExistsAsync(id, {
-					type: "channel",
-					common: { name: key },
-					native: {},
-				});
-				await this.writeRecursive(adapter, id, value);
+				await this.writeRecursive(adapter, parentId, value);
 				continue;
 			}
 
@@ -288,6 +282,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 			let role = "state";
 			let unit: string | undefined = undefined;
 			let states: Record<string, string> | undefined;
+			let read = true;
 			let write = false;
 
 			// Enum-Mapping
@@ -359,12 +354,13 @@ class MitsubishiLocalControl extends utils.Adapter {
 					}
 					break;
 
-				case "buzzer":
+				case "triggerBuzzer":
 					if (typeof value === "boolean") {
 						type = "boolean";
-						role = "indicator";
+						role = "button";
+						read = false;
 						write = true;
-						name = "Buzzer";
+						name = "Trigger buzzer";
 					}
 					break;
 
@@ -378,9 +374,10 @@ class MitsubishiLocalControl extends utils.Adapter {
 							role = "value.temperature";
 							unit = "°C";
 
-							if (keyLower.includes("finetemperature")) {
+							if (keyLower.includes("targettemperature")) {
 								write = true;
 								role = "level.temperature";
+								name = "Traget temperature";
 							}
 						} else if (keyLower.includes("power") || keyLower.includes("energy")) {
 							role = "value.power";
@@ -398,6 +395,8 @@ class MitsubishiLocalControl extends utils.Adapter {
 			}
 
 			// State Objekt erstellen
+			const id = write ? `${parentId}.control.${key}` : `${parentId}.info.${key}`;
+
 			await adapter.setObjectNotExistsAsync(id, {
 				type: "state",
 				common: {
@@ -405,7 +404,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 					type,
 					role,
 					unit,
-					read: true,
+					read: read,
 					write: write,
 					...(states ? { states } : {}),
 				},
@@ -434,7 +433,19 @@ class MitsubishiLocalControl extends utils.Adapter {
 			native: {},
 		});
 
-		await this.writeRecursive(adapter, `${deviceId}`, parsedState);
+		await adapter.setObjectNotExistsAsync(`${deviceId}.control`, {
+			type: "channel",
+			common: { name: "Device control" },
+			native: {},
+		});
+
+		await adapter.setObjectNotExistsAsync(`${deviceId}.info`, {
+			type: "channel",
+			common: { name: "Device information" },
+			native: {},
+		});
+
+		await this.writeRecursive(adapter, deviceId, parsedState);
 	}
 }
 

@@ -70,8 +70,8 @@ export class MitsubishiChangeSet {
 		this.changes |= Controls.RemoteLock;
 	}
 
-	setBuzzer(buzzer: boolean): void {
-		this.desiredState.buzzer = buzzer;
+	triggerBuzzer(): void {
+		this.desiredState.triggerBuzzer = true;
 		this.changes08 |= Controls08.Buzzer;
 	}
 }
@@ -324,9 +324,9 @@ export class MitsubishiController {
 		return this.applyChangeset(changeset);
 	}
 
-	async setBuzzer(enabled = true): Promise<ParsedDeviceState | undefined> {
+	async triggerBuzzer(): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
-		changeset.setBuzzer(enabled);
+		changeset.triggerBuzzer();
 		return this.applyChangeset(changeset);
 	}
 
