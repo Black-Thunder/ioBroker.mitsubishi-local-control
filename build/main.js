@@ -108,6 +108,10 @@ class MitsubishiLocalControl extends utils.Adapter {
             await device.controller.setVerticalVane(state.val);
           } else if (id.endsWith("vaneHorizontalDirection")) {
             await device.controller.setHorizontalVane(state.val);
+          } else if (id.endsWith("remoteLock")) {
+            await device.controller.setRemoteLock(state.val);
+          } else if (id.endsWith("buzzer")) {
+            await device.controller.setBuzzer(state.val);
           } else {
             this.log.warn(`Unhandled command for state ${id}`);
             return;
@@ -255,7 +259,7 @@ class MitsubishiLocalControl extends utils.Adapter {
           if (this.isEnumValue(import_types.OperationMode, value)) {
             type = "number";
             states = this.enumToStates(import_types.OperationMode);
-            role = "mode";
+            role = "level.mode.airconditioner";
             name = "Operation Mode";
             write = true;
           }
@@ -264,7 +268,7 @@ class MitsubishiLocalControl extends utils.Adapter {
           if (this.isEnumValue(import_types.FanSpeed, value)) {
             type = "number";
             states = this.enumToStates(import_types.FanSpeed);
-            role = "level";
+            role = "level.mode.fan";
             name = "Fan speed (while in manual mode)";
             write = true;
           }
@@ -292,13 +296,23 @@ class MitsubishiLocalControl extends utils.Adapter {
             type = "number";
             states = this.enumToStates(import_types.AutoMode);
             role = "mode";
+            name = "Auto mode";
           }
           break;
         case "remoteLock":
           if (this.isEnumValue(import_types.RemoteLock, value)) {
             type = "number";
             states = this.enumToStates(import_types.RemoteLock);
-            role = "state";
+            write = true;
+            name = "Remote lock";
+          }
+          break;
+        case "buzzer":
+          if (typeof value === "boolean") {
+            type = "boolean";
+            role = "indicator";
+            write = true;
+            name = "Buzzer";
           }
           break;
         default:
@@ -310,6 +324,7 @@ class MitsubishiLocalControl extends utils.Adapter {
               unit = "\xB0C";
               if (keyLower.includes("finetemperature")) {
                 write = true;
+                role = "level.temperature";
               }
             } else if (keyLower.includes("power") || keyLower.includes("energy")) {
               role = "value.power";

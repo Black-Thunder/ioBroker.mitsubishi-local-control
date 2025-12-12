@@ -74,6 +74,14 @@ class MitsubishiChangeSet {
     this.desiredState.isPowerSaving = powerSaving;
     this.changes08 |= import_types.Controls08.PowerSaving;
   }
+  setRemoteLock(remoteLock) {
+    this.desiredState.remoteLock = remoteLock;
+    this.changes |= import_types.Controls.RemoteLock;
+  }
+  setBuzzer(buzzer) {
+    this.desiredState.buzzer = buzzer;
+    this.changes08 |= import_types.Controls08.Buzzer;
+  }
 }
 class MitsubishiController {
   parsedDeviceState = null;
@@ -264,20 +272,16 @@ class MitsubishiController {
     changeset.setPowerSaving(enabled);
     return this.applyChangeset(changeset);
   }
-  /*async sendBuzzerCommand(enabled = true): Promise<ParsedDeviceState | undefined> {
-  		const changeset = await this.getChangeset();
-  		const s = this.parsedDeviceState ?? new ParsedDeviceState();
-  		const buf = s.general.generateExtend08Command(Controls08.Buzzer);
-  		return this.applyHexCommand(buf.toString("hex"));
-  	}
-  
-  	async setRemoteLock(lockFlags: number): Promise<ParsedDeviceState | undefined> {
-  		const changeset = await this.getChangeset();
-  		const s = this.parsedDeviceState ?? new ParsedDeviceState();
-  		s.general.remoteLock = lockFlags;
-  		const buf = s.general.generateGeneralCommand(Controls.RemoteLock);
-  		return this.applyHexCommand(buf.toString("hex"));
-  	}*/
+  async setBuzzer(enabled = true) {
+    const changeset = await this.getChangeset();
+    changeset.setBuzzer(enabled);
+    return this.applyChangeset(changeset);
+  }
+  async setRemoteLock(lockFlags) {
+    const changeset = await this.getChangeset();
+    changeset.setRemoteLock(lockFlags);
+    return this.applyChangeset(changeset);
+  }
   async sendGeneralCommand(state, controls) {
     const buf = state.generateGeneralCommand(controls);
     this.log.debug(`Sending General Command: ${buf.toString("hex")}`);

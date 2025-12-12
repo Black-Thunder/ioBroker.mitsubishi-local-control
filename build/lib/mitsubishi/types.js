@@ -230,6 +230,7 @@ class GeneralStates {
   windAndWindBreakDirect = 0;
   iSeeSensor = true;
   wideVaneAdjustment = false;
+  buzzer = false;
   constructor(other) {
     if (other) {
       Object.assign(this, other);

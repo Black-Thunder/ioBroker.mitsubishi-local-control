@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import { XMLParser } from "fast-xml-parser";
 
 import { MitsubishiAPI } from "./mitsubishiApi";
-import type { FanSpeed, OperationMode, VaneHorizontalDirection, VaneVerticalDirection } from "./types";
+import type { FanSpeed, OperationMode, RemoteLock, VaneHorizontalDirection, VaneVerticalDirection } from "./types";
 import { Controls, Controls08, GeneralStates, ParsedDeviceState } from "./types";
 
 const xmlParser = new XMLParser({
@@ -63,6 +63,16 @@ export class MitsubishiChangeSet {
 	setPowerSaving(powerSaving: boolean): void {
 		this.desiredState.isPowerSaving = powerSaving;
 		this.changes08 |= Controls08.PowerSaving;
+	}
+
+	setRemoteLock(remoteLock: RemoteLock): void {
+		this.desiredState.remoteLock = remoteLock;
+		this.changes |= Controls.RemoteLock;
+	}
+
+	setBuzzer(buzzer: boolean): void {
+		this.desiredState.buzzer = buzzer;
+		this.changes08 |= Controls08.Buzzer;
 	}
 }
 
@@ -314,20 +324,17 @@ export class MitsubishiController {
 		return this.applyChangeset(changeset);
 	}
 
-	/*async sendBuzzerCommand(enabled = true): Promise<ParsedDeviceState | undefined> {
+	async setBuzzer(enabled = true): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
-		const s = this.parsedDeviceState ?? new ParsedDeviceState();
-		const buf = s.general.generateExtend08Command(Controls08.Buzzer);
-		return this.applyHexCommand(buf.toString("hex"));
+		changeset.setBuzzer(enabled);
+		return this.applyChangeset(changeset);
 	}
 
-	async setRemoteLock(lockFlags: number): Promise<ParsedDeviceState | undefined> {
+	async setRemoteLock(lockFlags: RemoteLock): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
-		const s = this.parsedDeviceState ?? new ParsedDeviceState();
-		s.general.remoteLock = lockFlags;
-		const buf = s.general.generateGeneralCommand(Controls.RemoteLock);
-		return this.applyHexCommand(buf.toString("hex"));
-	}*/
+		changeset.setRemoteLock(lockFlags);
+		return this.applyChangeset(changeset);
+	}
 
 	private async sendGeneralCommand(state: GeneralStates, controls: Controls): Promise<ParsedDeviceState> {
 		const buf = state.generateGeneralCommand(controls);

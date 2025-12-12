@@ -216,6 +216,7 @@ export class GeneralStates {
 	windAndWindBreakDirect: number = 0;
 	iSeeSensor: boolean = true;
 	wideVaneAdjustment: boolean = false;
+	buzzer: boolean = false;
 
 	constructor(other?: GeneralStates) {
 		if (other) {
