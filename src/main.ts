@@ -10,7 +10,6 @@ import {
 	AutoMode,
 	DriveMode,
 	HorizontalWindDirection,
-	PowerOnOff,
 	RemoteLock,
 	VerticalWindDirection,
 	WindSpeed,
@@ -290,9 +289,8 @@ class MitsubishiLocalControl extends utils.Adapter {
 			// Enum-Mapping
 			switch (key) {
 				case "powerOnOff":
-					if (this.isEnumValue(PowerOnOff, value)) {
-						type = "number";
-						states = this.enumToStates(PowerOnOff);
+					if (typeof value === "boolean") {
+						type = "boolean";
 						role = "switch.power";
 						write = true;
 					}

@@ -244,9 +244,8 @@ class MitsubishiLocalControl extends utils.Adapter {
       let write = false;
       switch (key) {
         case "powerOnOff":
-          if (this.isEnumValue(import_types.PowerOnOff, value)) {
-            type = "number";
-            states = this.enumToStates(import_types.PowerOnOff);
+          if (typeof value === "boolean") {
+            type = "boolean";
             role = "switch.power";
             write = true;
           }

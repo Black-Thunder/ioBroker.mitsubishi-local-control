@@ -4,11 +4,6 @@ export const KEY_SIZE = 16;
 export const STATIC_KEY = Buffer.from("unregistered\0\0\0\0", "utf8");
 
 /* eslint-disable no-unused-vars */
-export enum PowerOnOff {
-	OFF = 0,
-	ON = 1,
-}
-
 export enum DriveMode {
 	HEAT = 1,
 	DRY = 2,
@@ -208,7 +203,7 @@ export class AutoStates {
 }
 
 export class GeneralStates {
-	powerOnOff: PowerOnOff = PowerOnOff.OFF;
+	powerOnOff: boolean = false;
 	driveMode: DriveMode = DriveMode.AUTO;
 	coarseTemperature: number = 22;
 	fineTemperature: number | null = 22.0;
@@ -246,7 +241,7 @@ export class GeneralStates {
 		}
 
 		const obj = new GeneralStates();
-		obj.powerOnOff = data[8] === 1 ? PowerOnOff.ON : PowerOnOff.OFF;
+		obj.powerOnOff = data[8] === 1;
 		obj.driveMode = data[9] & 0x07;
 		obj.coarseTemperature = 31 - data[10];
 		obj.windSpeed = data[11];
@@ -280,7 +275,7 @@ export class GeneralStates {
 		body[4] = 0x01;
 		const ctrl = (controls as unknown as number) | (Controls.OutsideControl as unknown as number);
 		body.writeUInt16BE(ctrl & 0xffff, 5);
-		body[7] = (this.powerOnOff as unknown as number) & 0xff;
+		body[7] = this.powerOnOff ? 1 : 0;
 		body[8] = typeof this.driveMode === "number" ? this.driveMode : Number(this.driveMode);
 		body[9] = 31 - Math.floor(this.temperature);
 		body[10] = (this.windSpeed as unknown as number) & 0xff;

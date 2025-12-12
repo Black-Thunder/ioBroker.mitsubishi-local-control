@@ -2,8 +2,8 @@ import { Buffer } from "buffer";
 import { XMLParser } from "fast-xml-parser";
 
 import { MitsubishiAPI } from "./mitsubishiApi";
-import type { HorizontalWindDirection, VerticalWindDirection, WindSpeed, DriveMode } from "./types";
-import { Controls, Controls08, GeneralStates, ParsedDeviceState, PowerOnOff } from "./types";
+import type { DriveMode, HorizontalWindDirection, VerticalWindDirection, WindSpeed } from "./types";
+import { Controls, Controls08, GeneralStates, ParsedDeviceState } from "./types";
 
 const xmlParser = new XMLParser({
 	ignoreAttributes: false,
@@ -25,7 +25,7 @@ export class MitsubishiChangeSet {
 		return this.changes === Controls.NoControl && this.changes08 === Controls08.NoControl;
 	}
 
-	setPower(power: PowerOnOff): void {
+	setPower(power: boolean): void {
 		this.desiredState.powerOnOff = power;
 		this.changes |= Controls.PowerOnOff;
 	}
@@ -268,7 +268,7 @@ export class MitsubishiController {
 
 	async setPower(on: boolean): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
-		changeset.setPower(on ? PowerOnOff.ON : PowerOnOff.OFF);
+		changeset.setPower(on);
 		return this.applyChangeset(changeset);
 	}
 

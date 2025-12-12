@@ -226,7 +226,7 @@ class MitsubishiController {
   }
   async setPower(on) {
     const changeset = await this.getChangeset();
-    changeset.setPower(on ? import_types.PowerOnOff.ON : import_types.PowerOnOff.OFF);
+    changeset.setPower(on);
     return this.applyChangeset(changeset);
   }
   async setTemperature(tempC) {

@@ -29,7 +29,6 @@ __export(types_exports, {
   HorizontalWindDirection: () => HorizontalWindDirection,
   KEY_SIZE: () => KEY_SIZE,
   ParsedDeviceState: () => ParsedDeviceState,
-  PowerOnOff: () => PowerOnOff,
   RemoteLock: () => RemoteLock,
   STATIC_KEY: () => STATIC_KEY,
   SensorStates: () => SensorStates,
@@ -40,11 +39,6 @@ module.exports = __toCommonJS(types_exports);
 var import_utils = require("./utils");
 const KEY_SIZE = 16;
 const STATIC_KEY = Buffer.from("unregistered\0\0\0\0", "utf8");
-var PowerOnOff = /* @__PURE__ */ ((PowerOnOff2) => {
-  PowerOnOff2[PowerOnOff2["OFF"] = 0] = "OFF";
-  PowerOnOff2[PowerOnOff2["ON"] = 1] = "ON";
-  return PowerOnOff2;
-})(PowerOnOff || {});
 var DriveMode = /* @__PURE__ */ ((DriveMode2) => {
   DriveMode2[DriveMode2["HEAT"] = 1] = "HEAT";
   DriveMode2[DriveMode2["DRY"] = 2] = "DRY";
@@ -223,7 +217,7 @@ class AutoStates {
   }
 }
 class GeneralStates {
-  powerOnOff = 0 /* OFF */;
+  powerOnOff = false;
   driveMode = 8 /* AUTO */;
   coarseTemperature = 22;
   fineTemperature = 22;
@@ -256,7 +250,7 @@ class GeneralStates {
       throw new Error("Invalid checksum");
     }
     const obj = new GeneralStates();
-    obj.powerOnOff = data[8] === 1 ? 1 /* ON */ : 0 /* OFF */;
+    obj.powerOnOff = data[8] === 1;
     obj.driveMode = data[9] & 7;
     obj.coarseTemperature = 31 - data[10];
     obj.windSpeed = data[11];
@@ -288,7 +282,7 @@ class GeneralStates {
     body[4] = 1;
     const ctrl = controls | 2 /* OutsideControl */;
     body.writeUInt16BE(ctrl & 65535, 5);
-    body[7] = this.powerOnOff & 255;
+    body[7] = this.powerOnOff ? 1 : 0;
     body[8] = typeof this.driveMode === "number" ? this.driveMode : Number(this.driveMode);
     body[9] = 31 - Math.floor(this.temperature);
     body[10] = this.windSpeed & 255;
@@ -373,7 +367,6 @@ class ParsedDeviceState {
   HorizontalWindDirection,
   KEY_SIZE,
   ParsedDeviceState,
-  PowerOnOff,
   RemoteLock,
   STATIC_KEY,
   SensorStates,
