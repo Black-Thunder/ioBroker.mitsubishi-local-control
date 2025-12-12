@@ -4,7 +4,7 @@ export const KEY_SIZE = 16;
 export const STATIC_KEY = Buffer.from("unregistered\0\0\0\0", "utf8");
 
 /* eslint-disable no-unused-vars */
-export enum DriveMode {
+export enum OperationMode {
 	HEAT = 1,
 	DRY = 2,
 	COOL = 3,
@@ -12,7 +12,7 @@ export enum DriveMode {
 	AUTO = 8,
 }
 
-export enum WindSpeed {
+export enum FanSpeed {
 	AUTO = 0,
 	S1 = 1,
 	S2 = 2,
@@ -21,23 +21,23 @@ export enum WindSpeed {
 	FULL = 6,
 }
 
-export enum VerticalWindDirection {
+export enum VaneVerticalDirection {
 	AUTO = 0,
-	V1 = 1,
-	V2 = 2,
-	V3 = 3,
-	V4 = 4,
-	V5 = 5,
+	TOPMOST = 1,
+	UP = 2,
+	MIDDLE = 3,
+	DOWN = 4,
+	BOTTOMMOST = 5,
 	SWING = 7,
 }
 
-export enum HorizontalWindDirection {
+export enum VaneHorizontalDirection {
 	AUTO = 0,
-	FAR_LEFT = 1,
+	LEFTMOST = 1,
 	LEFT = 2,
-	CENTER = 3,
+	MIDDLE = 3,
 	RIGHT = 4,
-	FAR_RIGHT = 5,
+	RIGHTMOST = 5,
 	LEFT_CENTER = 6,
 	CENTER_RIGHT = 7,
 	LEFT_RIGHT = 8,
@@ -61,13 +61,13 @@ export enum RemoteLock {
 
 export enum Controls {
 	NoControl = 0x0000,
-	PowerOnOff = 0x0100,
-	DriveMode = 0x0200,
+	Power = 0x0100,
+	OperationMode = 0x0200,
 	Temperature = 0x0400,
-	WindSpeed = 0x0800,
-	UpDownWindDirection = 0x1000,
+	FanSpeed = 0x0800,
+	VaneVerticalDirection = 0x1000,
 	RemoteLock = 0x4000,
-	LeftRightWindDirect = 0x0001,
+	VaneHorizontalDirection = 0x0001,
 	OutsideControl = 0x0002,
 	// others omitted for brevity
 }
@@ -203,14 +203,14 @@ export class AutoStates {
 }
 
 export class GeneralStates {
-	powerOnOff: boolean = false;
-	driveMode: DriveMode = DriveMode.AUTO;
+	power: boolean = false;
+	operationMode: OperationMode = OperationMode.AUTO;
 	coarseTemperature: number = 22;
 	fineTemperature: number | null = 22.0;
-	windSpeed: WindSpeed = WindSpeed.AUTO;
-	verticalWindDirection: VerticalWindDirection = VerticalWindDirection.AUTO;
+	fanSpeed: FanSpeed = FanSpeed.AUTO;
+	vaneVerticalDirection: VaneVerticalDirection = VaneVerticalDirection.AUTO;
 	remoteLock: RemoteLock = RemoteLock.UNLOCKED;
-	horizontalWindDirection: HorizontalWindDirection = HorizontalWindDirection.AUTO;
+	vaneHorizontalDirection: VaneHorizontalDirection = VaneHorizontalDirection.AUTO;
 	dehumSetting: number = 0;
 	isPowerSaving: boolean = false;
 	windAndWindBreakDirect: number = 0;
@@ -241,13 +241,13 @@ export class GeneralStates {
 		}
 
 		const obj = new GeneralStates();
-		obj.powerOnOff = data[8] === 1;
-		obj.driveMode = data[9] & 0x07;
+		obj.power = data[8] === 1;
+		obj.operationMode = data[9] & 0x07;
 		obj.coarseTemperature = 31 - data[10];
-		obj.windSpeed = data[11];
-		obj.verticalWindDirection = data[12];
+		obj.fanSpeed = data[11];
+		obj.vaneVerticalDirection = data[12];
 		obj.remoteLock = data[13];
-		obj.horizontalWindDirection = data[15] & 0x0f;
+		obj.vaneHorizontalDirection = data[15] & 0x0f;
 		obj.wideVaneAdjustment = (data[15] & 0xf0) === 0x80;
 		obj.fineTemperature = data[16] !== 0x00 ? (data[16] - 0x80) / 2 : null;
 		obj.dehumSetting = data[17];
@@ -275,17 +275,17 @@ export class GeneralStates {
 		body[4] = 0x01;
 		const ctrl = (controls as unknown as number) | (Controls.OutsideControl as unknown as number);
 		body.writeUInt16BE(ctrl & 0xffff, 5);
-		body[7] = this.powerOnOff ? 1 : 0;
-		body[8] = typeof this.driveMode === "number" ? this.driveMode : Number(this.driveMode);
+		body[7] = this.power ? 1 : 0;
+		body[8] = typeof this.operationMode === "number" ? this.operationMode : Number(this.operationMode);
 		body[9] = 31 - Math.floor(this.temperature);
-		body[10] = (this.windSpeed as unknown as number) & 0xff;
-		body[11] = (this.verticalWindDirection as unknown as number) & 0xff;
+		body[10] = (this.fanSpeed as unknown as number) & 0xff;
+		body[11] = (this.vaneVerticalDirection as unknown as number) & 0xff;
 		body[12] = 0;
 		body[13] = 0;
 		body[14] = 0;
 		body[15] = this.remoteLock & 0xff;
 		body[16] = 0;
-		body[17] = (this.horizontalWindDirection as unknown as number) & 0xff;
+		body[17] = (this.vaneHorizontalDirection as unknown as number) & 0xff;
 		body[18] = this.fineTemperature !== null ? (0x80 + Math.floor(this.fineTemperature * 2)) & 0xff : 0x00;
 		body[19] = 0x41;
 

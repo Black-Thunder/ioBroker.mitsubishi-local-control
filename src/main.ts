@@ -8,11 +8,11 @@ import { MitsubishiController } from "./lib/mitsubishi/mitsubishiController";
 import type { ParsedDeviceState } from "./lib/mitsubishi/types";
 import {
 	AutoMode,
-	DriveMode,
-	HorizontalWindDirection,
+	FanSpeed,
+	OperationMode,
 	RemoteLock,
-	VerticalWindDirection,
-	WindSpeed,
+	VaneHorizontalDirection,
+	VaneVerticalDirection,
 } from "./lib/mitsubishi/types";
 
 interface Device {
@@ -107,17 +107,17 @@ class MitsubishiLocalControl extends utils.Adapter {
 				this.log.debug(`Command on ${id} → forwarding to device ${device.name} (${mac})`);
 
 				try {
-					if (id.endsWith("powerOnOff")) {
+					if (id.endsWith("power")) {
 						await device.controller.setPower(state.val as boolean);
 					} else if (id.endsWith("fineTemperature")) {
 						await device.controller.setTemperature(state.val as number);
-					} else if (id.endsWith("driveMode")) {
+					} else if (id.endsWith("operationMode")) {
 						await device.controller.setMode(state.val as number);
-					} else if (id.endsWith("windSpeed")) {
+					} else if (id.endsWith("fanSpeed")) {
 						await device.controller.setFanSpeed(state.val as number);
-					} else if (id.endsWith("verticalWindDirection")) {
+					} else if (id.endsWith("vaneVerticalDirection")) {
 						await device.controller.setVerticalVane(state.val as number);
-					} else if (id.endsWith("horizontalWindDirection")) {
+					} else if (id.endsWith("vaneHorizontalDirection")) {
 						await device.controller.setHorizontalVane(state.val as number);
 					} else {
 						this.log.warn(`Unhandled command for state ${id}`);
@@ -221,12 +221,11 @@ class MitsubishiLocalControl extends utils.Adapter {
 					await this.updateDeviceStates(this, parsed, device.name);
 				} catch (err: any) {
 					this.log.error(`Polling error for ${device.name}: ${err}`);
-				} finally {
-					device.pollingJob = setTimeout(poll, interval);
 				}
 			};
 
 			await poll();
+			device.pollingJob = setInterval(poll, interval);
 		}
 
 		this.log.info(`Started polling all devices every ${this.config.pollingInterval} seconds.`);
@@ -281,6 +280,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 			}
 
 			let type: ioBroker.CommonType = "string";
+			let name = key;
 			let role = "state";
 			let unit: string | undefined = undefined;
 			let states: Record<string, string> | undefined;
@@ -288,46 +288,51 @@ class MitsubishiLocalControl extends utils.Adapter {
 
 			// Enum-Mapping
 			switch (key) {
-				case "powerOnOff":
+				case "power":
 					if (typeof value === "boolean") {
 						type = "boolean";
 						role = "switch.power";
+						name = "Power";
 						write = true;
 					}
 					break;
 
-				case "driveMode":
-					if (this.isEnumValue(DriveMode, value)) {
+				case "operationMode":
+					if (this.isEnumValue(OperationMode, value)) {
 						type = "number";
-						states = this.enumToStates(DriveMode);
+						states = this.enumToStates(OperationMode);
 						role = "mode";
+						name = "Operation Mode";
 						write = true;
 					}
 					break;
 
-				case "windSpeed":
-					if (this.isEnumValue(WindSpeed, value)) {
+				case "fanSpeed":
+					if (this.isEnumValue(FanSpeed, value)) {
 						type = "number";
-						states = this.enumToStates(WindSpeed);
+						states = this.enumToStates(FanSpeed);
 						role = "level";
+						name = "Fan speed (while in manual mode)";
 						write = true;
 					}
 					break;
 
-				case "verticalWindDirection":
-					if (this.isEnumValue(VerticalWindDirection, value)) {
+				case "vaneVerticalDirection":
+					if (this.isEnumValue(VaneVerticalDirection, value)) {
 						type = "number";
-						states = this.enumToStates(VerticalWindDirection);
+						states = this.enumToStates(VaneVerticalDirection);
 						role = "level";
+						name = "Vane vertical direction";
 						write = true;
 					}
 					break;
 
-				case "horizontalWindDirection":
-					if (this.isEnumValue(HorizontalWindDirection, value)) {
+				case "vaneHorizontalDirection":
+					if (this.isEnumValue(VaneHorizontalDirection, value)) {
 						type = "number";
-						states = this.enumToStates(HorizontalWindDirection);
+						states = this.enumToStates(VaneHorizontalDirection);
 						role = "level";
+						name = "Vane horizontal direction";
 						write = true;
 					}
 					break;
@@ -379,7 +384,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 			await adapter.setObjectNotExistsAsync(id, {
 				type: "state",
 				common: {
-					name: key,
+					name: name,
 					type,
 					role,
 					unit,

@@ -22,64 +22,64 @@ __export(types_exports, {
   AutoStates: () => AutoStates,
   Controls: () => Controls,
   Controls08: () => Controls08,
-  DriveMode: () => DriveMode,
   EnergyStates: () => EnergyStates,
   ErrorStates: () => ErrorStates,
+  FanSpeed: () => FanSpeed,
   GeneralStates: () => GeneralStates,
-  HorizontalWindDirection: () => HorizontalWindDirection,
   KEY_SIZE: () => KEY_SIZE,
+  OperationMode: () => OperationMode,
   ParsedDeviceState: () => ParsedDeviceState,
   RemoteLock: () => RemoteLock,
   STATIC_KEY: () => STATIC_KEY,
   SensorStates: () => SensorStates,
-  VerticalWindDirection: () => VerticalWindDirection,
-  WindSpeed: () => WindSpeed
+  VaneHorizontalDirection: () => VaneHorizontalDirection,
+  VaneVerticalDirection: () => VaneVerticalDirection
 });
 module.exports = __toCommonJS(types_exports);
 var import_utils = require("./utils");
 const KEY_SIZE = 16;
 const STATIC_KEY = Buffer.from("unregistered\0\0\0\0", "utf8");
-var DriveMode = /* @__PURE__ */ ((DriveMode2) => {
-  DriveMode2[DriveMode2["HEAT"] = 1] = "HEAT";
-  DriveMode2[DriveMode2["DRY"] = 2] = "DRY";
-  DriveMode2[DriveMode2["COOL"] = 3] = "COOL";
-  DriveMode2[DriveMode2["VENT"] = 7] = "VENT";
-  DriveMode2[DriveMode2["AUTO"] = 8] = "AUTO";
-  return DriveMode2;
-})(DriveMode || {});
-var WindSpeed = /* @__PURE__ */ ((WindSpeed2) => {
-  WindSpeed2[WindSpeed2["AUTO"] = 0] = "AUTO";
-  WindSpeed2[WindSpeed2["S1"] = 1] = "S1";
-  WindSpeed2[WindSpeed2["S2"] = 2] = "S2";
-  WindSpeed2[WindSpeed2["S3"] = 3] = "S3";
-  WindSpeed2[WindSpeed2["S4"] = 5] = "S4";
-  WindSpeed2[WindSpeed2["FULL"] = 6] = "FULL";
-  return WindSpeed2;
-})(WindSpeed || {});
-var VerticalWindDirection = /* @__PURE__ */ ((VerticalWindDirection2) => {
-  VerticalWindDirection2[VerticalWindDirection2["AUTO"] = 0] = "AUTO";
-  VerticalWindDirection2[VerticalWindDirection2["V1"] = 1] = "V1";
-  VerticalWindDirection2[VerticalWindDirection2["V2"] = 2] = "V2";
-  VerticalWindDirection2[VerticalWindDirection2["V3"] = 3] = "V3";
-  VerticalWindDirection2[VerticalWindDirection2["V4"] = 4] = "V4";
-  VerticalWindDirection2[VerticalWindDirection2["V5"] = 5] = "V5";
-  VerticalWindDirection2[VerticalWindDirection2["SWING"] = 7] = "SWING";
-  return VerticalWindDirection2;
-})(VerticalWindDirection || {});
-var HorizontalWindDirection = /* @__PURE__ */ ((HorizontalWindDirection2) => {
-  HorizontalWindDirection2[HorizontalWindDirection2["AUTO"] = 0] = "AUTO";
-  HorizontalWindDirection2[HorizontalWindDirection2["FAR_LEFT"] = 1] = "FAR_LEFT";
-  HorizontalWindDirection2[HorizontalWindDirection2["LEFT"] = 2] = "LEFT";
-  HorizontalWindDirection2[HorizontalWindDirection2["CENTER"] = 3] = "CENTER";
-  HorizontalWindDirection2[HorizontalWindDirection2["RIGHT"] = 4] = "RIGHT";
-  HorizontalWindDirection2[HorizontalWindDirection2["FAR_RIGHT"] = 5] = "FAR_RIGHT";
-  HorizontalWindDirection2[HorizontalWindDirection2["LEFT_CENTER"] = 6] = "LEFT_CENTER";
-  HorizontalWindDirection2[HorizontalWindDirection2["CENTER_RIGHT"] = 7] = "CENTER_RIGHT";
-  HorizontalWindDirection2[HorizontalWindDirection2["LEFT_RIGHT"] = 8] = "LEFT_RIGHT";
-  HorizontalWindDirection2[HorizontalWindDirection2["LEFT_CENTER_RIGHT"] = 9] = "LEFT_CENTER_RIGHT";
-  HorizontalWindDirection2[HorizontalWindDirection2["SWING"] = 12] = "SWING";
-  return HorizontalWindDirection2;
-})(HorizontalWindDirection || {});
+var OperationMode = /* @__PURE__ */ ((OperationMode2) => {
+  OperationMode2[OperationMode2["HEAT"] = 1] = "HEAT";
+  OperationMode2[OperationMode2["DRY"] = 2] = "DRY";
+  OperationMode2[OperationMode2["COOL"] = 3] = "COOL";
+  OperationMode2[OperationMode2["VENT"] = 7] = "VENT";
+  OperationMode2[OperationMode2["AUTO"] = 8] = "AUTO";
+  return OperationMode2;
+})(OperationMode || {});
+var FanSpeed = /* @__PURE__ */ ((FanSpeed2) => {
+  FanSpeed2[FanSpeed2["AUTO"] = 0] = "AUTO";
+  FanSpeed2[FanSpeed2["S1"] = 1] = "S1";
+  FanSpeed2[FanSpeed2["S2"] = 2] = "S2";
+  FanSpeed2[FanSpeed2["S3"] = 3] = "S3";
+  FanSpeed2[FanSpeed2["S4"] = 5] = "S4";
+  FanSpeed2[FanSpeed2["FULL"] = 6] = "FULL";
+  return FanSpeed2;
+})(FanSpeed || {});
+var VaneVerticalDirection = /* @__PURE__ */ ((VaneVerticalDirection2) => {
+  VaneVerticalDirection2[VaneVerticalDirection2["AUTO"] = 0] = "AUTO";
+  VaneVerticalDirection2[VaneVerticalDirection2["TOPMOST"] = 1] = "TOPMOST";
+  VaneVerticalDirection2[VaneVerticalDirection2["UP"] = 2] = "UP";
+  VaneVerticalDirection2[VaneVerticalDirection2["MIDDLE"] = 3] = "MIDDLE";
+  VaneVerticalDirection2[VaneVerticalDirection2["DOWN"] = 4] = "DOWN";
+  VaneVerticalDirection2[VaneVerticalDirection2["BOTTOMMOST"] = 5] = "BOTTOMMOST";
+  VaneVerticalDirection2[VaneVerticalDirection2["SWING"] = 7] = "SWING";
+  return VaneVerticalDirection2;
+})(VaneVerticalDirection || {});
+var VaneHorizontalDirection = /* @__PURE__ */ ((VaneHorizontalDirection2) => {
+  VaneHorizontalDirection2[VaneHorizontalDirection2["AUTO"] = 0] = "AUTO";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["LEFTMOST"] = 1] = "LEFTMOST";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["LEFT"] = 2] = "LEFT";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["MIDDLE"] = 3] = "MIDDLE";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["RIGHT"] = 4] = "RIGHT";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["RIGHTMOST"] = 5] = "RIGHTMOST";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["LEFT_CENTER"] = 6] = "LEFT_CENTER";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["CENTER_RIGHT"] = 7] = "CENTER_RIGHT";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["LEFT_RIGHT"] = 8] = "LEFT_RIGHT";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["LEFT_CENTER_RIGHT"] = 9] = "LEFT_CENTER_RIGHT";
+  VaneHorizontalDirection2[VaneHorizontalDirection2["SWING"] = 12] = "SWING";
+  return VaneHorizontalDirection2;
+})(VaneHorizontalDirection || {});
 var AutoMode = /* @__PURE__ */ ((AutoMode2) => {
   AutoMode2[AutoMode2["OFF"] = 0] = "OFF";
   AutoMode2[AutoMode2["SWITCHING"] = 1] = "SWITCHING";
@@ -96,13 +96,13 @@ var RemoteLock = /* @__PURE__ */ ((RemoteLock2) => {
 })(RemoteLock || {});
 var Controls = /* @__PURE__ */ ((Controls2) => {
   Controls2[Controls2["NoControl"] = 0] = "NoControl";
-  Controls2[Controls2["PowerOnOff"] = 256] = "PowerOnOff";
-  Controls2[Controls2["DriveMode"] = 512] = "DriveMode";
+  Controls2[Controls2["Power"] = 256] = "Power";
+  Controls2[Controls2["OperationMode"] = 512] = "OperationMode";
   Controls2[Controls2["Temperature"] = 1024] = "Temperature";
-  Controls2[Controls2["WindSpeed"] = 2048] = "WindSpeed";
-  Controls2[Controls2["UpDownWindDirection"] = 4096] = "UpDownWindDirection";
+  Controls2[Controls2["FanSpeed"] = 2048] = "FanSpeed";
+  Controls2[Controls2["VaneVerticalDirection"] = 4096] = "VaneVerticalDirection";
   Controls2[Controls2["RemoteLock"] = 16384] = "RemoteLock";
-  Controls2[Controls2["LeftRightWindDirect"] = 1] = "LeftRightWindDirect";
+  Controls2[Controls2["VaneHorizontalDirection"] = 1] = "VaneHorizontalDirection";
   Controls2[Controls2["OutsideControl"] = 2] = "OutsideControl";
   return Controls2;
 })(Controls || {});
@@ -217,14 +217,14 @@ class AutoStates {
   }
 }
 class GeneralStates {
-  powerOnOff = false;
-  driveMode = 8 /* AUTO */;
+  power = false;
+  operationMode = 8 /* AUTO */;
   coarseTemperature = 22;
   fineTemperature = 22;
-  windSpeed = 0 /* AUTO */;
-  verticalWindDirection = 0 /* AUTO */;
+  fanSpeed = 0 /* AUTO */;
+  vaneVerticalDirection = 0 /* AUTO */;
   remoteLock = 0 /* UNLOCKED */;
-  horizontalWindDirection = 0 /* AUTO */;
+  vaneHorizontalDirection = 0 /* AUTO */;
   dehumSetting = 0;
   isPowerSaving = false;
   windAndWindBreakDirect = 0;
@@ -250,13 +250,13 @@ class GeneralStates {
       throw new Error("Invalid checksum");
     }
     const obj = new GeneralStates();
-    obj.powerOnOff = data[8] === 1;
-    obj.driveMode = data[9] & 7;
+    obj.power = data[8] === 1;
+    obj.operationMode = data[9] & 7;
     obj.coarseTemperature = 31 - data[10];
-    obj.windSpeed = data[11];
-    obj.verticalWindDirection = data[12];
+    obj.fanSpeed = data[11];
+    obj.vaneVerticalDirection = data[12];
     obj.remoteLock = data[13];
-    obj.horizontalWindDirection = data[15] & 15;
+    obj.vaneHorizontalDirection = data[15] & 15;
     obj.wideVaneAdjustment = (data[15] & 240) === 128;
     obj.fineTemperature = data[16] !== 0 ? (data[16] - 128) / 2 : null;
     obj.dehumSetting = data[17];
@@ -282,17 +282,17 @@ class GeneralStates {
     body[4] = 1;
     const ctrl = controls | 2 /* OutsideControl */;
     body.writeUInt16BE(ctrl & 65535, 5);
-    body[7] = this.powerOnOff ? 1 : 0;
-    body[8] = typeof this.driveMode === "number" ? this.driveMode : Number(this.driveMode);
+    body[7] = this.power ? 1 : 0;
+    body[8] = typeof this.operationMode === "number" ? this.operationMode : Number(this.operationMode);
     body[9] = 31 - Math.floor(this.temperature);
-    body[10] = this.windSpeed & 255;
-    body[11] = this.verticalWindDirection & 255;
+    body[10] = this.fanSpeed & 255;
+    body[11] = this.vaneVerticalDirection & 255;
     body[12] = 0;
     body[13] = 0;
     body[14] = 0;
     body[15] = this.remoteLock & 255;
     body[16] = 0;
-    body[17] = this.horizontalWindDirection & 255;
+    body[17] = this.vaneHorizontalDirection & 255;
     body[18] = this.fineTemperature !== null ? 128 + Math.floor(this.fineTemperature * 2) & 255 : 0;
     body[19] = 65;
     const fcc = (0, import_utils.calcFcc)(body);
@@ -360,17 +360,17 @@ class ParsedDeviceState {
   AutoStates,
   Controls,
   Controls08,
-  DriveMode,
   EnergyStates,
   ErrorStates,
+  FanSpeed,
   GeneralStates,
-  HorizontalWindDirection,
   KEY_SIZE,
+  OperationMode,
   ParsedDeviceState,
   RemoteLock,
   STATIC_KEY,
   SensorStates,
-  VerticalWindDirection,
-  WindSpeed
+  VaneHorizontalDirection,
+  VaneVerticalDirection
 });
 //# sourceMappingURL=types.js.map

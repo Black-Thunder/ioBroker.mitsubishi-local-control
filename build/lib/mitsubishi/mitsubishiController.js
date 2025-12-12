@@ -43,12 +43,12 @@ class MitsubishiChangeSet {
     return this.changes === import_types.Controls.NoControl && this.changes08 === import_types.Controls08.NoControl;
   }
   setPower(power) {
-    this.desiredState.powerOnOff = power;
-    this.changes |= import_types.Controls.PowerOnOff;
+    this.desiredState.power = power;
+    this.changes |= import_types.Controls.Power;
   }
-  setMode(driveMode) {
-    this.desiredState.driveMode = driveMode;
-    this.changes |= import_types.Controls.DriveMode;
+  setMode(operationMode) {
+    this.desiredState.operationMode = operationMode;
+    this.changes |= import_types.Controls.OperationMode;
   }
   setTemperature(temperature) {
     this.desiredState.temperature = temperature;
@@ -59,16 +59,16 @@ class MitsubishiChangeSet {
     this.changes08 |= import_types.Controls08.Dehum;
   }
   setFanSpeed(fanSpeed) {
-    this.desiredState.windSpeed = fanSpeed;
-    this.changes |= import_types.Controls.WindSpeed;
+    this.desiredState.fanSpeed = fanSpeed;
+    this.changes |= import_types.Controls.FanSpeed;
   }
   setVerticalVane(vVane) {
-    this.desiredState.verticalWindDirection = vVane;
-    this.changes |= import_types.Controls.UpDownWindDirection;
+    this.desiredState.vaneVerticalDirection = vVane;
+    this.changes |= import_types.Controls.VaneVerticalDirection;
   }
   setHorizontalVane(hVane) {
-    this.desiredState.horizontalWindDirection = hVane;
-    this.changes |= import_types.Controls.LeftRightWindDirect;
+    this.desiredState.vaneHorizontalDirection = hVane;
+    this.changes |= import_types.Controls.VaneHorizontalDirection;
   }
   setPowerSaving(powerSaving) {
     this.desiredState.isPowerSaving = powerSaving;

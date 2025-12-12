@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import { XMLParser } from "fast-xml-parser";
 
 import { MitsubishiAPI } from "./mitsubishiApi";
-import type { DriveMode, HorizontalWindDirection, VerticalWindDirection, WindSpeed } from "./types";
+import type { FanSpeed, OperationMode, VaneHorizontalDirection, VaneVerticalDirection } from "./types";
 import { Controls, Controls08, GeneralStates, ParsedDeviceState } from "./types";
 
 const xmlParser = new XMLParser({
@@ -26,13 +26,13 @@ export class MitsubishiChangeSet {
 	}
 
 	setPower(power: boolean): void {
-		this.desiredState.powerOnOff = power;
-		this.changes |= Controls.PowerOnOff;
+		this.desiredState.power = power;
+		this.changes |= Controls.Power;
 	}
 
-	setMode(driveMode: DriveMode): void {
-		this.desiredState.driveMode = driveMode as number;
-		this.changes |= Controls.DriveMode;
+	setMode(operationMode: OperationMode): void {
+		this.desiredState.operationMode = operationMode as number;
+		this.changes |= Controls.OperationMode;
 	}
 
 	setTemperature(temperature: number): void {
@@ -45,19 +45,19 @@ export class MitsubishiChangeSet {
 		this.changes08 |= Controls08.Dehum;
 	}
 
-	setFanSpeed(fanSpeed: WindSpeed): void {
-		this.desiredState.windSpeed = fanSpeed;
-		this.changes |= Controls.WindSpeed;
+	setFanSpeed(fanSpeed: FanSpeed): void {
+		this.desiredState.fanSpeed = fanSpeed;
+		this.changes |= Controls.FanSpeed;
 	}
 
-	setVerticalVane(vVane: VerticalWindDirection): void {
-		this.desiredState.verticalWindDirection = vVane;
-		this.changes |= Controls.UpDownWindDirection;
+	setVerticalVane(vVane: VaneVerticalDirection): void {
+		this.desiredState.vaneVerticalDirection = vVane;
+		this.changes |= Controls.VaneVerticalDirection;
 	}
 
-	setHorizontalVane(hVane: HorizontalWindDirection): void {
-		this.desiredState.horizontalWindDirection = hVane;
-		this.changes |= Controls.LeftRightWindDirect;
+	setHorizontalVane(hVane: VaneHorizontalDirection): void {
+		this.desiredState.vaneHorizontalDirection = hVane;
+		this.changes |= Controls.VaneHorizontalDirection;
 	}
 
 	setPowerSaving(powerSaving: boolean): void {
@@ -278,25 +278,25 @@ export class MitsubishiController {
 		return this.applyChangeset(changeset);
 	}
 
-	async setMode(mode: DriveMode): Promise<ParsedDeviceState | undefined> {
+	async setMode(mode: OperationMode): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
 		changeset.setMode(mode);
 		return this.applyChangeset(changeset);
 	}
 
-	async setFanSpeed(speed: WindSpeed): Promise<ParsedDeviceState | undefined> {
+	async setFanSpeed(speed: FanSpeed): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
 		changeset.setFanSpeed(speed);
 		return this.applyChangeset(changeset);
 	}
 
-	async setVerticalVane(v: VerticalWindDirection): Promise<ParsedDeviceState | undefined> {
+	async setVerticalVane(v: VaneVerticalDirection): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
 		changeset.setVerticalVane(v);
 		return this.applyChangeset(changeset);
 	}
 
-	async setHorizontalVane(h: HorizontalWindDirection): Promise<ParsedDeviceState | undefined> {
+	async setHorizontalVane(h: VaneHorizontalDirection): Promise<ParsedDeviceState | undefined> {
 		const changeset = await this.getChangeset();
 		changeset.setHorizontalVane(h);
 		return this.applyChangeset(changeset);
