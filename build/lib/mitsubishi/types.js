@@ -49,11 +49,11 @@ var OperationMode = /* @__PURE__ */ ((OperationMode2) => {
 })(OperationMode || {});
 var FanSpeed = /* @__PURE__ */ ((FanSpeed2) => {
   FanSpeed2[FanSpeed2["AUTO"] = 0] = "AUTO";
-  FanSpeed2[FanSpeed2["S1"] = 1] = "S1";
-  FanSpeed2[FanSpeed2["S2"] = 2] = "S2";
-  FanSpeed2[FanSpeed2["S3"] = 3] = "S3";
-  FanSpeed2[FanSpeed2["S4"] = 5] = "S4";
-  FanSpeed2[FanSpeed2["FULL"] = 6] = "FULL";
+  FanSpeed2[FanSpeed2["LOWEST"] = 1] = "LOWEST";
+  FanSpeed2[FanSpeed2["LOW"] = 2] = "LOW";
+  FanSpeed2[FanSpeed2["MEDIUM"] = 3] = "MEDIUM";
+  FanSpeed2[FanSpeed2["HIGH"] = 5] = "HIGH";
+  FanSpeed2[FanSpeed2["MAX"] = 6] = "MAX";
   return FanSpeed2;
 })(FanSpeed || {});
 var VaneVerticalDirection = /* @__PURE__ */ ((VaneVerticalDirection2) => {

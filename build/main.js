@@ -113,14 +113,14 @@ class MitsubishiLocalControl extends utils.Adapter {
             await device.controller.setRemoteLock(state.val);
           } else if (id.endsWith("triggerBuzzer")) {
             await device.controller.triggerBuzzer();
-            await this.setState(id, state.val, true);
           } else {
             this.log.warn(`Unhandled command for state ${id}`);
             return;
           }
         } catch (err) {
-          this.log.error(`Error executing command for ${mac}: ${err}`);
+          this.log.error(`Error executing command for ${device.name}: ${err}`);
         }
+        await this.setState(id, state.val, true);
       }
     } else {
       this.log.silly(`state ${id} deleted`);
@@ -186,6 +186,10 @@ class MitsubishiLocalControl extends utils.Adapter {
     const interval = this.config.pollingInterval * 1e3;
     for (const device of this.devices) {
       const poll = async () => {
+        if (device.controller.isCommandInProgress) {
+          this.log.debug(`Skipping poll for ${device.name}: command in progress`);
+          return;
+        }
         try {
           this.log.debug(`Polling ${device.name} (${device.ip}) ...`);
           const parsed = await device.controller.fetchStatus();

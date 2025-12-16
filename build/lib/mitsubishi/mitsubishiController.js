@@ -22,6 +22,7 @@ __export(mitsubishiController_exports, {
   MitsubishiController: () => MitsubishiController
 });
 module.exports = __toCommonJS(mitsubishiController_exports);
+var import_async_mutex = require("async-mutex");
 var import_buffer = require("buffer");
 var import_fast_xml_parser = require("fast-xml-parser");
 var import_mitsubishiApi = require("./mitsubishiApi");
@@ -85,10 +86,14 @@ class MitsubishiChangeSet {
 }
 class MitsubishiController {
   parsedDeviceState = null;
+  isCommandInProgress = false;
   log;
   api;
-  profile_code = [];
-  static waitTimeAfterCommand = 5e3;
+  mutex = new import_async_mutex.Mutex();
+  commandQueue = [];
+  isProcessingQueue = false;
+  profileCode = [];
+  static waitTimeAfterCommand = 6e3;
   constructor(api, log) {
     this.api = api;
     this.log = log;
@@ -100,10 +105,15 @@ class MitsubishiController {
   cleanupController() {
     this.api.close();
   }
-  async fetchStatus() {
-    var _a;
+  async fetchStatus(useLock = true) {
+    if (useLock) {
+      return this.withLock(async () => {
+        const resp2 = await this.api.sendStatusRequest();
+        const parsedResp2 = this.parseStatusResponse(resp2);
+        return parsedResp2;
+      });
+    }
     const resp = await this.api.sendStatusRequest();
-    this.parsedDeviceState = (_a = this.parsedDeviceState) != null ? _a : new import_types.ParsedDeviceState();
     const parsedResp = this.parseStatusResponse(resp);
     return parsedResp;
   }
@@ -149,13 +159,13 @@ class MitsubishiController {
     if (appVer) {
       this.parsedDeviceState.app_version = appVer.toString();
     }
-    this.profile_code = [];
+    this.profileCode = [];
     const profiles1 = this.extractTagList(rootObj, ["PROFILECODE", "DATA", "VALUE"]);
     const profiles2 = this.extractTagList(rootObj, ["PROFILECODE", "VALUE"]);
     const mergedProfiles = [...profiles1, ...profiles2];
     for (const hex of mergedProfiles) {
       try {
-        this.profile_code.push(import_buffer.Buffer.from(hex, "hex"));
+        this.profileCode.push(import_buffer.Buffer.from(hex, "hex"));
       } catch {
       }
     }
@@ -209,9 +219,17 @@ class MitsubishiController {
     return result;
   }
   async applyHexCommand(hex) {
-    const resp = await this.api.sendHexCommand(hex);
-    await new Promise((r) => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
-    return resp;
+    return this.withLock(async () => {
+      try {
+        this.isCommandInProgress = true;
+        await this.api.sendHexCommand(hex);
+        await new Promise((r) => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
+        const newState = await this.fetchStatus(false);
+        return newState;
+      } finally {
+        this.isCommandInProgress = false;
+      }
+    });
   }
   async ensureDeviceState() {
     if (!this.parsedDeviceState || !this.parsedDeviceState.general) {
@@ -224,13 +242,98 @@ class MitsubishiController {
     return new MitsubishiChangeSet((_b = (_a = this.parsedDeviceState) == null ? void 0 : _a.general) != null ? _b : new import_types.GeneralStates());
   }
   async applyChangeset(changeset) {
-    let newState = void 0;
-    if (changeset.changes !== import_types.Controls.NoControl) {
-      newState = await this.sendGeneralCommand(changeset.desiredState, changeset.changes);
-    } else if (changeset.changes08 !== import_types.Controls08.NoControl) {
-      newState = await this.sendExtend08Command(changeset.desiredState, changeset.changes08);
+    try {
+      return await new Promise(() => {
+        this.commandQueue.push(async () => {
+          let newState;
+          if (changeset.changes !== import_types.Controls.NoControl) {
+            newState = await this.sendGeneralCommand(changeset.desiredState, changeset.changes);
+          } else if (changeset.changes08 !== import_types.Controls08.NoControl) {
+            newState = await this.sendExtend08Command(changeset.desiredState, changeset.changes08);
+          }
+          if (newState) {
+            return newState;
+          }
+          throw new Error("Device did not apply the command");
+        });
+        void this.processCommandQueue();
+      });
+    } catch {
     }
-    return newState;
+  }
+  async processCommandQueue() {
+    if (this.isProcessingQueue || this.commandQueue.length === 0) {
+      return;
+    }
+    this.isProcessingQueue = true;
+    try {
+      while (this.commandQueue.length > 0) {
+        const nextCommand = this.commandQueue.shift();
+        if (nextCommand) {
+          try {
+            await nextCommand();
+          } catch {
+          }
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+    } finally {
+      this.isProcessingQueue = false;
+    }
+  }
+  verifyCommandAccepted(changeset, newState) {
+    if (!newState.general) {
+      return false;
+    }
+    if (changeset.changes & import_types.Controls.Power) {
+      if (newState.general.power !== changeset.desiredState.power) {
+        this.log.warn(
+          `Power command not accepted by device. Desired: ${changeset.desiredState.power}, Got: ${newState.general.power}`
+        );
+        return false;
+      }
+    }
+    if (changeset.changes & import_types.Controls.Temperature) {
+      if (Math.abs(newState.general.temperature - changeset.desiredState.temperature) > 0.5) {
+        this.log.warn(
+          `Temperature command not accepted by device. Desired: ${changeset.desiredState.temperature}, Got: ${newState.general.temperature}`
+        );
+        return false;
+      }
+    }
+    if (changeset.changes & import_types.Controls.OperationMode) {
+      if (newState.general.operationMode !== changeset.desiredState.operationMode) {
+        this.log.warn(
+          `Mode command not accepted by device. Desired: ${changeset.desiredState.operationMode}, Got: ${newState.general.operationMode}`
+        );
+        return false;
+      }
+    }
+    if (changeset.changes & import_types.Controls.FanSpeed) {
+      if (newState.general.fanSpeed !== changeset.desiredState.fanSpeed) {
+        this.log.warn(
+          `Fan speed command not accepted by device. Desired: ${changeset.desiredState.fanSpeed}, Got: ${newState.general.fanSpeed}`
+        );
+        return false;
+      }
+    }
+    if (changeset.changes & import_types.Controls.VaneHorizontalDirection) {
+      if (newState.general.vaneHorizontalDirection !== changeset.desiredState.vaneHorizontalDirection) {
+        this.log.warn(
+          `Vane horizontal direction command not accepted by device. Desired: ${changeset.desiredState.vaneHorizontalDirection}, Got: ${newState.general.vaneHorizontalDirection}`
+        );
+        return false;
+      }
+    }
+    if (changeset.changes & import_types.Controls.VaneVerticalDirection) {
+      if (newState.general.vaneVerticalDirection !== changeset.desiredState.vaneVerticalDirection) {
+        this.log.warn(
+          `Vane vertical direction command not accepted by device. Desired: ${changeset.desiredState.vaneVerticalDirection}, Got: ${newState.general.vaneVerticalDirection}`
+        );
+        return false;
+      }
+    }
+    return true;
   }
   async setPower(on) {
     const changeset = await this.getChangeset();
@@ -285,20 +388,21 @@ class MitsubishiController {
   async sendGeneralCommand(state, controls) {
     const buf = state.generateGeneralCommand(controls);
     this.log.debug(`Sending General Command: ${buf.toString("hex")}`);
-    const response = await this.applyHexCommand(buf.toString("hex"));
-    return this.parseStatusResponse(response);
+    return this.applyHexCommand(buf.toString("hex"));
   }
   async sendExtend08Command(state, controls) {
     const buf = state.generateExtend08Command(controls);
     this.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
-    const response = await this.applyHexCommand(buf.toString("hex"));
-    return this.parseStatusResponse(response);
+    return this.applyHexCommand(buf.toString("hex"));
   }
   async enableEchonet() {
     return this.api.sendEchonetEnable();
   }
   async reboot() {
     return this.api.sendRebootRequest();
+  }
+  async withLock(fn) {
+    return this.mutex.runExclusive(fn);
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

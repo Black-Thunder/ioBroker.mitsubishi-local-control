@@ -125,14 +125,15 @@ class MitsubishiLocalControl extends utils.Adapter {
 						await device.controller.setRemoteLock(state.val as number);
 					} else if (id.endsWith("triggerBuzzer")) {
 						await device.controller.triggerBuzzer();
-						await this.setState(id, state.val, true); // set ACK to true
 					} else {
 						this.log.warn(`Unhandled command for state ${id}`);
 						return;
 					}
 				} catch (err: any) {
-					this.log.error(`Error executing command for ${mac}: ${err}`);
+					this.log.error(`Error executing command for ${device.name}: ${err}`);
 				}
+
+				await this.setState(id, state.val, true); // command was confirmed by device, set ACK to true
 			}
 		} else {
 			// The object was deleted or the state value has expired
@@ -220,6 +221,11 @@ class MitsubishiLocalControl extends utils.Adapter {
 
 		for (const device of this.devices) {
 			const poll = async (): Promise<void> => {
+				if (device.controller.isCommandInProgress) {
+					this.log.debug(`Skipping poll for ${device.name}: command in progress`);
+					return;
+				}
+
 				try {
 					this.log.debug(`Polling ${device.name} (${device.ip}) ...`);
 

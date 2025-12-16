@@ -14,11 +14,11 @@ export enum OperationMode {
 
 export enum FanSpeed {
 	AUTO = 0,
-	S1 = 1,
-	S2 = 2,
-	S3 = 3,
-	S4 = 5,
-	FULL = 6,
+	LOWEST = 1,
+	LOW = 2,
+	MEDIUM = 3,
+	HIGH = 5,
+	MAX = 6,
 }
 
 export enum VaneVerticalDirection {

@@ -13,7 +13,25 @@
 
 ## mitsubishi-local-control adapter for ioBroker
 
-Describe your project here
+The **mitsubishi-local-control** adapter integrates Mitsubishi Electric air conditioning systems into **ioBroker** using a **direct local connection**.
+
+## Features
+
+- Direct local control via Mitsubishi Wi-Fi interface
+- No cloud, no external dependencies
+- Read and write device states
+- Periodic polling of device status
+- Support for multiple devices
+- Automatic device state synchronization
+
+## Documentation:
+
+- [English description](https://github.com/Black-Thunder/ioBroker.mitsubishi-local-control/tree/main/docs/en/melcloud.md)
+- [Deutsche Beschreibung](https://github.com/Black-Thunder/ioBroker.mitsubishi-local-control/tree/main/docs/de/melcloud.md)
+
+## Discussion:
+
+- [ioBroker Forum](TODO)
 
 ## Changelog
 

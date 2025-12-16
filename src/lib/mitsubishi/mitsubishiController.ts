@@ -1,3 +1,4 @@
+import { Mutex } from "async-mutex";
 import { Buffer } from "buffer";
 import { XMLParser } from "fast-xml-parser";
 
@@ -81,11 +82,16 @@ export class MitsubishiChangeSet {
  */
 export class MitsubishiController {
 	public parsedDeviceState: ParsedDeviceState | null = null;
+	public isCommandInProgress = false;
 
 	private log: ioBroker.Logger;
 	private api: MitsubishiAPI;
-	private profile_code: Buffer[] = [];
-	static waitTimeAfterCommand = 5000;
+	private readonly mutex = new Mutex();
+	private readonly commandQueue: Array<() => Promise<ParsedDeviceState>> = [];
+	private isProcessingQueue = false;
+	private profileCode: Buffer[] = [];
+
+	static waitTimeAfterCommand = 6000;
 
 	constructor(api: MitsubishiAPI, log: ioBroker.Logger) {
 		this.api = api;
@@ -105,9 +111,16 @@ export class MitsubishiController {
 		this.api.close();
 	}
 
-	async fetchStatus(): Promise<ParsedDeviceState> {
+	async fetchStatus(useLock = true): Promise<ParsedDeviceState> {
+		if (useLock) {
+			return this.withLock(async () => {
+				const resp = await this.api.sendStatusRequest();
+				const parsedResp = this.parseStatusResponse(resp);
+				return parsedResp;
+			});
+		}
+
 		const resp = await this.api.sendStatusRequest();
-		this.parsedDeviceState = this.parsedDeviceState ?? new ParsedDeviceState();
 		const parsedResp = this.parseStatusResponse(resp);
 		return parsedResp;
 	}
@@ -168,7 +181,7 @@ export class MitsubishiController {
 		}
 
 		// ---- 4: Extract PROFILECODE values (two possible locations like Python) ----
-		this.profile_code = [];
+		this.profileCode = [];
 
 		const profiles1 = this.extractTagList(rootObj, ["PROFILECODE", "DATA", "VALUE"]);
 		const profiles2 = this.extractTagList(rootObj, ["PROFILECODE", "VALUE"]);
@@ -177,7 +190,7 @@ export class MitsubishiController {
 
 		for (const hex of mergedProfiles) {
 			try {
-				this.profile_code.push(Buffer.from(hex, "hex"));
+				this.profileCode.push(Buffer.from(hex, "hex"));
 			} catch {
 				// ignore malformed entries exactly like python would
 			}
@@ -246,11 +259,23 @@ export class MitsubishiController {
 		return result;
 	}
 
-	private async applyHexCommand(hex: string): Promise<string> {
-		const resp = await this.api.sendHexCommand(hex);
-		// wait a bit to let the device update if necessary
-		await new Promise(r => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
-		return resp;
+	private async applyHexCommand(hex: string): Promise<ParsedDeviceState> {
+		return this.withLock(async () => {
+			try {
+				this.isCommandInProgress = true;
+				await this.api.sendHexCommand(hex);
+
+				// Wait for device to process the command
+				await new Promise(r => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
+
+				// Fetch fresh status after device has processed
+				const newState = await this.fetchStatus(false);
+
+				return newState;
+			} finally {
+				this.isCommandInProgress = false;
+			}
+		});
 	}
 
 	private async ensureDeviceState(): Promise<void> {
@@ -265,15 +290,128 @@ export class MitsubishiController {
 	}
 
 	private async applyChangeset(changeset: MitsubishiChangeSet): Promise<ParsedDeviceState | undefined> {
-		let newState = undefined;
+		try {
+			// Add command to queue and return a promise that resolves when done
+			return await new Promise((/*resolve, reject*/) => {
+				this.commandQueue.push(async () => {
+					//try {
+					let newState: ParsedDeviceState | undefined;
 
-		if (changeset.changes !== Controls.NoControl) {
-			newState = await this.sendGeneralCommand(changeset.desiredState, changeset.changes);
-		} else if (changeset.changes08 !== Controls08.NoControl) {
-			newState = await this.sendExtend08Command(changeset.desiredState, changeset.changes08);
+					if (changeset.changes !== Controls.NoControl) {
+						newState = await this.sendGeneralCommand(changeset.desiredState, changeset.changes);
+					} else if (changeset.changes08 !== Controls08.NoControl) {
+						newState = await this.sendExtend08Command(changeset.desiredState, changeset.changes08);
+					}
+
+					// Verify that the command was accepted
+					if (newState /*&& this.verifyCommandAccepted(changeset, newState)*/) {
+						//resolve(newState);
+						return newState;
+					}
+					throw new Error("Device did not apply the command");
+					//} catch (error) {
+					//reject(error);
+					//	throw error;
+					//}
+				});
+
+				// Start processing the command queue if not already running
+				void this.processCommandQueue();
+			});
+		} catch {
+			//this.log.error(`Failed to apply changeset: ${(error as Error).message}`);
+			//throw error;
+		}
+	}
+
+	private async processCommandQueue(): Promise<void> {
+		// Prevent concurrent processing
+		if (this.isProcessingQueue || this.commandQueue.length === 0) {
+			return;
 		}
 
-		return newState;
+		this.isProcessingQueue = true;
+		try {
+			while (this.commandQueue.length > 0) {
+				const nextCommand = this.commandQueue.shift();
+				if (nextCommand) {
+					try {
+						await nextCommand();
+					} catch {
+						// error was already in reject() handled
+						// Here only log, not rethrow
+						//this.log.warn(`Command in queue failed: ${(error as Error).message}`);
+					}
+					// Wait after each command to prevent polling conflicts
+					await new Promise(r => setTimeout(r, 500));
+				}
+			}
+		} finally {
+			this.isProcessingQueue = false;
+		}
+	}
+
+	private verifyCommandAccepted(changeset: MitsubishiChangeSet, newState: ParsedDeviceState): boolean {
+		if (!newState.general) {
+			return false;
+		}
+
+		// Verify based on what was changed
+		if (changeset.changes & Controls.Power) {
+			if (newState.general.power !== changeset.desiredState.power) {
+				this.log.warn(
+					`Power command not accepted by device. Desired: ${changeset.desiredState.power}, Got: ${newState.general.power}`,
+				);
+				return false;
+			}
+		}
+
+		if (changeset.changes & Controls.Temperature) {
+			if (Math.abs(newState.general.temperature - changeset.desiredState.temperature) > 0.5) {
+				this.log.warn(
+					`Temperature command not accepted by device. Desired: ${changeset.desiredState.temperature}, Got: ${newState.general.temperature}`,
+				);
+				return false;
+			}
+		}
+
+		if (changeset.changes & Controls.OperationMode) {
+			if (newState.general.operationMode !== changeset.desiredState.operationMode) {
+				this.log.warn(
+					`Mode command not accepted by device. Desired: ${changeset.desiredState.operationMode}, Got: ${newState.general.operationMode}`,
+				);
+				return false;
+			}
+		}
+
+		if (changeset.changes & Controls.FanSpeed) {
+			if (newState.general.fanSpeed !== changeset.desiredState.fanSpeed) {
+				this.log.warn(
+					`Fan speed command not accepted by device. Desired: ${changeset.desiredState.fanSpeed}, Got: ${newState.general.fanSpeed}`,
+				);
+				return false;
+			}
+		}
+
+		if (changeset.changes & Controls.VaneHorizontalDirection) {
+			if (newState.general.vaneHorizontalDirection !== changeset.desiredState.vaneHorizontalDirection) {
+				this.log.warn(
+					`Vane horizontal direction command not accepted by device. Desired: ${changeset.desiredState.vaneHorizontalDirection}, Got: ${newState.general.vaneHorizontalDirection}`,
+				);
+				return false;
+			}
+		}
+
+		if (changeset.changes & Controls.VaneVerticalDirection) {
+			if (newState.general.vaneVerticalDirection !== changeset.desiredState.vaneVerticalDirection) {
+				this.log.warn(
+					`Vane vertical direction command not accepted by device. Desired: ${changeset.desiredState.vaneVerticalDirection}, Got: ${newState.general.vaneVerticalDirection}`,
+				);
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	async setPower(on: boolean): Promise<ParsedDeviceState | undefined> {
@@ -339,17 +477,13 @@ export class MitsubishiController {
 	private async sendGeneralCommand(state: GeneralStates, controls: Controls): Promise<ParsedDeviceState> {
 		const buf = state.generateGeneralCommand(controls);
 		this.log.debug(`Sending General Command: ${buf.toString("hex")}`);
-		const response = await this.applyHexCommand(buf.toString("hex"));
-
-		return this.parseStatusResponse(response);
+		return this.applyHexCommand(buf.toString("hex"));
 	}
 
 	private async sendExtend08Command(state: GeneralStates, controls: Controls08): Promise<ParsedDeviceState> {
 		const buf = state.generateExtend08Command(controls);
 		this.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
-		const response = await this.applyHexCommand(buf.toString("hex"));
-
-		return this.parseStatusResponse(response);
+		return this.applyHexCommand(buf.toString("hex"));
 	}
 
 	async enableEchonet(): Promise<string> {
@@ -358,5 +492,9 @@ export class MitsubishiController {
 
 	async reboot(): Promise<string> {
 		return this.api.sendRebootRequest();
+	}
+
+	private async withLock<T>(fn: () => Promise<T>): Promise<T> {
+		return this.mutex.runExclusive(fn);
 	}
 }
