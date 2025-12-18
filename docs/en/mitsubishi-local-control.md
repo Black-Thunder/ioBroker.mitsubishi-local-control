@@ -46,15 +46,30 @@ The device ID is derived from the device MAC address.
 
 #### `...info`
 
-| State       | Type    | Description                               |
-| ----------- | ------- | ----------------------------------------- |
-| mac         | string  | Device MAC address                        |
-| serial      | string  | Device serial number                      |
-| ip          | string  | Device IP address                         |
-| rssi        | string  | Wi-Fi signal strength                     |
-| app_version | string  | Firmware / application version            |
-| online      | boolean | Indicates if the device is reachable      |
-| hasError    | boolean | Indicates if the device is in error state |
+| State                    | Type    | Description |
+| ------------------------ | ------- | ----------- | -------------------------------------- |
+| appVersion               | string  | ✔           | App version                            |
+| autoMode                 | number  | ✔           | Current auto mode of the device        |
+| coarseTemperature        | number  | ✔           | Coarse temperature reading             |
+| deviceOnline             | boolean | ✔           | Indicates if device is reachable       |
+| energyHectoWattHour      | number  | ✔           | Energy consumption in hecto-watt-hours |
+| errorCode                | number  | ✔           | Current error code of the device       |
+| hasError                 | boolean | ✔           | Indicates if device has an error       |
+| iSeeSensor               | boolean | ✔           | iSee sensor status                     |
+| insideTemperature1Coarse | number  | ✔           | Coarse reading of inside temperature 1 |
+| insideTemperature1Fine   | number  | ✔           | Fine reading of inside temperature 1   |
+| insideTemperature2       | number  | ✔           | Inside temperature 2                   |
+| ip                       | string  | ✔           | Device IP address                      |
+| mac                      | string  | ✔           | Device MAC address                     |
+| operating                | boolean | ✔           | Device operating status                |
+| outsideTemperature       | number  | ✔           | Outside temperature                    |
+| powerMode                | string  | ✔           | Current power mode                     |
+| powerWatt                | number  | ✔           | Current power consumption in watts     |
+| rssi                     | number  | ✔           | Wi-Fi signal strength (RSSI)           |
+| runtimeMinutes           | number  | ✔           | Total runtime of the device in minutes |
+| serial                   | string  | ✔           | Device serial number                   |
+| wideVaneAdjustment       | boolean | ✔           | Wide vane adjustment                   |
+| windAndWindBreakDirect   | number  | ✔           | Wind and windbreak direction           |
 
 ### Device Control
 
@@ -62,14 +77,18 @@ The device ID is derived from the device MAC address.
 
 | State                   | Type    | Writable | Description                                              |
 | ----------------------- | ------- | :------: | -------------------------------------------------------- |
-| power                   | boolean |    ✔     | Turn device on/off                                       |
+| buzzer                  | boolean |    ✔     | Trigger device buzzer                                    |
+| dehumidifierLevel       | boolean |    ✔     | Dehumidifier control (adjustable level 0–100 %)          |
+| enableEchonet           | boolean |    ✔     | Enable/disable ECHONET protocol                          |
+| fanSpeed                | number  |    ✔     | Fan speed                                                |
 | operationMode           | number  |    ✔     | Operation mode                                           |
+| power                   | boolean |    ✔     | Turn device on/off                                       |
+| powerSaving             | boolean |    ✔     | Power saving mode (enable/disable energy saving)         |
+| rebootDevice            | boolean |    ✔     | Reboot device                                            |
 | remoteLock              | number  |    ✔     | Remote lock power, operation mode or temperature setting |
 | temperature             | number  |    ✔     | Target temperature                                       |
-| fanSpeed                | number  |    ✔     | Fan speed                                                |
 | vaneVerticalDirection   | number  |    ✔     | Vertical vane direction                                  |
 | vaneHorizontalDirection | number  |    ✔     | Horizontal vane direction                                |
-| buzzer                  | boolean |    ✔     | Trigger device buzzer                                    |
 
 ## Device Online Detection
 
