@@ -46,30 +46,30 @@ The device ID is derived from the device MAC address.
 
 #### `...info`
 
-| State                    | Type    | Description |                                        |
-| ------------------------ | ------- | ----------- | -------------------------------------- |
-| appVersion               | string  | ✔           | App version                            |
-| autoMode                 | number  | ✔           | Current auto mode of the device        |
-| coarseTemperature        | number  | ✔           | Coarse temperature reading             |
-| deviceOnline             | boolean | ✔           | Indicates if device is reachable       |
-| energyHectoWattHour      | number  | ✔           | Energy consumption in hecto-watt-hours |
-| errorCode                | number  | ✔           | Current error code of the device       |
-| hasError                 | boolean | ✔           | Indicates if device has an error       |
-| iSeeSensor               | boolean | ✔           | iSee sensor status                     |
-| insideTemperature1Coarse | number  | ✔           | Coarse reading of inside temperature 1 |
-| insideTemperature1Fine   | number  | ✔           | Fine reading of inside temperature 1   |
-| insideTemperature2       | number  | ✔           | Inside temperature 2                   |
-| ip                       | string  | ✔           | Device IP address                      |
-| mac                      | string  | ✔           | Device MAC address                     |
-| operating                | boolean | ✔           | Device operating status                |
-| outsideTemperature       | number  | ✔           | Outside temperature                    |
-| powerMode                | string  | ✔           | Current power mode                     |
-| powerWatt                | number  | ✔           | Current power consumption in watts     |
-| rssi                     | number  | ✔           | Wi-Fi signal strength (RSSI)           |
-| runtimeMinutes           | number  | ✔           | Total runtime of the device in minutes |
-| serial                   | string  | ✔           | Device serial number                   |
-| wideVaneAdjustment       | boolean | ✔           | Wide vane adjustment                   |
-| windAndWindBreakDirect   | number  | ✔           | Wind and windbreak direction           |
+| State                    | Type    | Description                            |
+| ------------------------ | ------- | -------------------------------------- |
+| appVersion               | string  | App version                            |
+| autoMode                 | number  | Current auto mode of the device        |
+| coarseTemperature        | number  | Coarse temperature reading             |
+| deviceOnline             | boolean | Indicates if device is reachable       |
+| energyHectoWattHour      | number  | Energy consumption in hecto-watt-hours |
+| errorCode                | number  | Current error code of the device       |
+| hasError                 | boolean | Indicates if device has an error       |
+| iSeeSensor               | boolean | iSee sensor status                     |
+| insideTemperature1Coarse | number  | Coarse reading of inside temperature 1 |
+| insideTemperature1Fine   | number  | Fine reading of inside temperature 1   |
+| insideTemperature2       | number  | Inside temperature 2                   |
+| ip                       | string  | Device IP address                      |
+| mac                      | string  | Device MAC address                     |
+| operating                | boolean | Device operating status                |
+| outsideTemperature       | number  | Outside temperature                    |
+| powerMode                | string  | Current power mode                     |
+| powerWatt                | number  | Current power consumption in watts     |
+| rssi                     | number  | Wi-Fi signal strength (RSSI)           |
+| runtimeMinutes           | number  | Total runtime of the device in minutes |
+| serial                   | string  | Device serial number                   |
+| wideVaneAdjustment       | boolean | Wide vane adjustment                   |
+| windAndWindBreakDirect   | number  | Wind and windbreak direction           |
 
 ### Device Control
 
