@@ -1,111 +1,131 @@
 {
-	"common": {
-		"name": "mitsubishi-local-control",
-		"version": "1.0.0",
-		"news": {
-			"1.0.0": {
-				"en": "initial release",
-				"de": "Erstveröffentlichung",
-				"ru": "Начальная версия",
-				"pt": "lançamento inicial",
-				"nl": "Eerste uitgave",
-				"fr": "Première version",
-				"it": "Versione iniziale",
-				"es": "Versión inicial",
-				"pl": "Pierwsze wydanie",
-				"uk": "Початкова версія",
-				"zh-cn": "首次出版"
-			}
-		},
-		"titleLang": {
-			"en": "Mitsubishi AC",
-			"de": "Mitsubishi AC",
-			"ru": "Mitsubishi AC",
-			"pt": "Mitsubishi AC",
-			"nl": "Mitsubishi AC",
-			"fr": "Mitsubishi AC",
-			"it": "Mitsubishi AC",
-			"es": "Mitsubishi AC",
-			"pl": "Mitsubishi AC",
-			"uk": "Mitsubishi AC",
-			"zh-cn": "三菱空调"
-		},
-		"desc": {
-			"en": "Local control of Mitsubishi Electric air conditioners via Wi-Fi (no cloud required)",
-			"de": "Lokale Steuerung von Mitsubishi-Electric-Klimageräten über WLAN (ohne Cloud)",
-			"ru": "Локальное управление кондиционерами Mitsubishi Electric по Wi-Fi (без облака)",
-			"pt": "Controlo local de aparelhos de ar condicionado Mitsubishi Electric via Wi-Fi (sem cloud)",
-			"nl": "Lokale bediening van Mitsubishi Electric airconditioners via wifi (zonder cloud)",
-			"fr": "Contrôle local des climatiseurs Mitsubishi Electric via Wi-Fi (sans cloud)",
-			"it": "Controllo locale dei climatizzatori Mitsubishi Electric via Wi-Fi (senza cloud)",
-			"es": "Control local de aires acondicionados Mitsubishi Electric vía Wi-Fi (sin nube)",
-			"pl": "Lokalne sterowanie klimatyzatorami Mitsubishi Electric przez Wi-Fi (bez chmury)",
-			"uk": "Локальне керування кондиціонерами Mitsubishi Electric через Wi-Fi (без хмари)",
-			"zh-cn": "通过 Wi-Fi 本地控制三菱电机空调（无需云端）"
-		},
-		"authors": ["Black-Thunder <glwars@aol.de>"],
-		"keywords": ["template", "automation", "IoT", "integration"],
-		"licenseInformation": {
-			"type": "free",
-			"license": "MIT"
-		},
-		"platform": "Javascript/Node.js",
-		"icon": "mitsubishi-local-control.png",
-		"enabled": false,
-		"extIcon": "https://raw.githubusercontent.com/Black-Thunder/ioBroker.mitsubishi-local-control/main/admin/mitsubishi-local-control.png",
-		"readme": "https://github.com/Black-Thunder/ioBroker.mitsubishi-local-control/blob/main/README.md",
-		"loglevel": "info",
-		"tier": 3,
-		"mode": "daemon",
-		"type": "climate-control",
-		"compact": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"adminUI": {
-			"config": "json"
-		},
-		"dependencies": [
-			{
-				"js-controller": ">=6.0.11"
-			}
-		],
-		"globalDependencies": [
-			{
-				"admin": ">=7.6.17"
-			}
-		]
-	},
-	"native": {
-		"devices": [
-			{
-				"name": "",
-				"ip": ""
-			}
-		],
-		"pollingInterval": 60
-	},
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "mitsubishi-local-control",
+    "version": "1.0.1-alpha.0",
+    "news": {
+      "1.0.1-alpha.0": {
+        "en": "Refactored energy and power state properties",
+        "de": "Refactored Energy und Power State Eigenschaften",
+        "ru": "Рефакторированные свойства энергии и состояния мощности",
+        "pt": "Propriedades do estado de energia e energia refractadas",
+        "nl": "Gerefactoreerde energie- en vermogenstoestandeigenschappen",
+        "fr": "Propriétés de l'état de l'énergie et de la puissance refactorées",
+        "it": "Energia e proprietà dello stato di potenza",
+        "es": "Propiedades de energía y estado de energía refactorizadas",
+        "pl": "Zmienne właściwości energii i stanu mocy",
+        "uk": "Рефакторні енергетичні та енергетичні властивості",
+        "zh-cn": "重构能源和动力状态属性"
+      },
+      "1.0.0": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "uk": "Початкова версія",
+        "zh-cn": "首次出版"
+      }
+    },
+    "titleLang": {
+      "en": "Mitsubishi AC",
+      "de": "Mitsubishi AC",
+      "ru": "Mitsubishi AC",
+      "pt": "Mitsubishi AC",
+      "nl": "Mitsubishi AC",
+      "fr": "Mitsubishi AC",
+      "it": "Mitsubishi AC",
+      "es": "Mitsubishi AC",
+      "pl": "Mitsubishi AC",
+      "uk": "Mitsubishi AC",
+      "zh-cn": "三菱空调"
+    },
+    "desc": {
+      "en": "Local control of Mitsubishi Electric air conditioners via Wi-Fi (no cloud required)",
+      "de": "Lokale Steuerung von Mitsubishi-Electric-Klimageräten über WLAN (ohne Cloud)",
+      "ru": "Локальное управление кондиционерами Mitsubishi Electric по Wi-Fi (без облака)",
+      "pt": "Controlo local de aparelhos de ar condicionado Mitsubishi Electric via Wi-Fi (sem cloud)",
+      "nl": "Lokale bediening van Mitsubishi Electric airconditioners via wifi (zonder cloud)",
+      "fr": "Contrôle local des climatiseurs Mitsubishi Electric via Wi-Fi (sans cloud)",
+      "it": "Controllo locale dei climatizzatori Mitsubishi Electric via Wi-Fi (senza cloud)",
+      "es": "Control local de aires acondicionados Mitsubishi Electric vía Wi-Fi (sin nube)",
+      "pl": "Lokalne sterowanie klimatyzatorami Mitsubishi Electric przez Wi-Fi (bez chmury)",
+      "uk": "Локальне керування кондиціонерами Mitsubishi Electric через Wi-Fi (без хмари)",
+      "zh-cn": "通过 Wi-Fi 本地控制三菱电机空调（无需云端）"
+    },
+    "authors": [
+      "Black-Thunder <glwars@aol.de>"
+    ],
+    "keywords": [
+      "template",
+      "automation",
+      "IoT",
+      "integration"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "mitsubishi-local-control.png",
+    "enabled": false,
+    "extIcon": "https://raw.githubusercontent.com/Black-Thunder/ioBroker.mitsubishi-local-control/main/admin/mitsubishi-local-control.png",
+    "readme": "https://github.com/Black-Thunder/ioBroker.mitsubishi-local-control/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.17"
+      }
+    ]
+  },
+  "native": {
+    "devices": [
+      {
+        "name": "",
+        "ip": ""
+      }
+    ],
+    "pollingInterval": 60
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }

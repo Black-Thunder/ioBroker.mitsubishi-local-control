@@ -39,8 +39,7 @@ The **mitsubishi-local-control** adapter integrates Mitsubishi Electric air cond
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 1.0.1-alpha.0 (2025-12-19)
 
 - (Black-Thunder) Refactored energy and power state properties
 
