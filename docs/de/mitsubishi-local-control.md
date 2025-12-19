@@ -52,7 +52,7 @@ Die Geräte-ID wird aus der MAC-Adresse des Geräts abgeleitet.
 | autoMode                 | number  | Aktueller Automatikmodus des Geräts     |
 | coarseTemperature        | number  | Grobe Temperaturmessung                 |
 | deviceOnline             | boolean | Zeigt an, ob das Gerät erreichbar ist   |
-| energyHectoWattHour      | number  | Energieverbrauch in Hekto-Wattstunden   |
+| energyConsumed           | number  | Energieverbrauch                        |
 | errorCode                | number  | Aktueller Fehlercode des Geräts         |
 | hasError                 | boolean | Zeigt an, ob das Gerät einen Fehler hat |
 | iSeeSensor               | boolean | Status des iSee-Sensors                 |
@@ -64,7 +64,7 @@ Die Geräte-ID wird aus der MAC-Adresse des Geräts abgeleitet.
 | operating                | boolean | Betriebsstatus des Geräts               |
 | outsideTemperature       | number  | Außentemperatur                         |
 | powerMode                | string  | Aktueller Energiemodus                  |
-| powerWatt                | number  | Aktueller Stromverbrauch in Watt        |
+| powerConsumed            | number  | Aktuelle Leistung                       |
 | rssi                     | number  | WLAN-Signalstärke (RSSI)                |
 | runtimeMinutes           | number  | Gesamtlaufzeit des Geräts in Minuten    |
 | serial                   | string  | Seriennummer des Geräts                 |

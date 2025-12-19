@@ -169,8 +169,8 @@ class ErrorStates {
 }
 class EnergyStates {
   operating = false;
-  powerWatt = 0;
-  energyHectoWattHour = 0;
+  powerConsumed = 0;
+  energyConsumed = 0;
   static isEnergyStatesPayload(data) {
     return data.length >= 6 && (data[1] === 98 || data[1] === 123) && data[5] === 6;
   }
@@ -187,8 +187,8 @@ class EnergyStates {
     }
     const obj = new EnergyStates();
     obj.operating = data[9] !== 0;
-    obj.powerWatt = data.readUInt16BE(10);
-    obj.energyHectoWattHour = data.readUInt16BE(12);
+    obj.powerConsumed = data.readUInt16BE(10);
+    obj.energyConsumed = data.readUInt16BE(12) / 10;
     return obj;
   }
 }

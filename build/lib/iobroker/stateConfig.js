@@ -120,6 +120,20 @@ const STATE_MAP = {
     name: "Error Code",
     desc: "Current error code of the device",
     states: { 32768: "No error" }
+  }),
+  energyConsumed: (_v) => ({
+    type: "number",
+    role: "value.energy.consumed",
+    name: "Energy consumption",
+    desc: "Energy consumption of the device",
+    unit: "kWh"
+  }),
+  powerConsumed: (_v) => ({
+    type: "number",
+    role: "value.power.consumed",
+    name: "Power consumption",
+    desc: "Power consumption of the device",
+    unit: "W"
   })
 };
 function guessStateConfig(key, value) {
@@ -135,11 +149,6 @@ function guessStateConfig(key, value) {
     if (keyLower.includes("temperature")) {
       config.role = "value.temperature";
       config.unit = "\xB0C";
-    } else if (keyLower.includes("power") || keyLower.includes("energy")) {
-      config.role = "value.power";
-      if (keyLower.includes("energy")) {
-        config.unit = "kWh";
-      }
     }
   } else if (typeof value === "string") {
     config.type = "string";

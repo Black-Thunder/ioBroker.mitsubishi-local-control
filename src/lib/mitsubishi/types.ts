@@ -146,8 +146,8 @@ export class ErrorStates {
 
 export class EnergyStates {
 	operating: boolean = false;
-	powerWatt: number = 0;
-	energyHectoWattHour: number = 0;
+	powerConsumed: number = 0;
+	energyConsumed: number = 0;
 
 	static isEnergyStatesPayload(data: Buffer): boolean {
 		return data.length >= 6 && (data[1] === 0x62 || data[1] === 0x7b) && data[5] === 0x06;
@@ -168,8 +168,8 @@ export class EnergyStates {
 
 		const obj = new EnergyStates();
 		obj.operating = data[9] !== 0;
-		obj.powerWatt = data.readUInt16BE(10);
-		obj.energyHectoWattHour = data.readUInt16BE(12);
+		obj.powerConsumed = data.readUInt16BE(10);
+		obj.energyConsumed = data.readUInt16BE(12) / 10; // 100 Wh → kWh
 		return obj;
 	}
 }

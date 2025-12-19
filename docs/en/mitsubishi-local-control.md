@@ -52,7 +52,7 @@ The device ID is derived from the device MAC address.
 | autoMode                 | number  | Current auto mode of the device        |
 | coarseTemperature        | number  | Coarse temperature reading             |
 | deviceOnline             | boolean | Indicates if device is reachable       |
-| energyHectoWattHour      | number  | Energy consumption in hecto-watt-hours |
+| energyConsumed           | number  | Energy consumption                     |
 | errorCode                | number  | Current error code of the device       |
 | hasError                 | boolean | Indicates if device has an error       |
 | iSeeSensor               | boolean | iSee sensor status                     |
@@ -64,7 +64,7 @@ The device ID is derived from the device MAC address.
 | operating                | boolean | Device operating status                |
 | outsideTemperature       | number  | Outside temperature                    |
 | powerMode                | string  | Current power mode                     |
-| powerWatt                | number  | Current power consumption in watts     |
+| powerConsumed            | number  | Current power consumption              |
 | rssi                     | number  | Wi-Fi signal strength (RSSI)           |
 | runtimeMinutes           | number  | Total runtime of the device in minutes |
 | serial                   | string  | Device serial number                   |

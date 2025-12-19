@@ -122,6 +122,20 @@ const STATE_MAP: Record<string, (_value: any) => StateConfig> = {
 		desc: "Current error code of the device",
 		states: { 32768: "No error" },
 	}),
+	energyConsumed: _v => ({
+		type: "number",
+		role: "value.energy.consumed",
+		name: "Energy consumption",
+		desc: "Energy consumption of the device",
+		unit: "kWh",
+	}),
+	powerConsumed: _v => ({
+		type: "number",
+		role: "value.power.consumed",
+		name: "Power consumption",
+		desc: "Power consumption of the device",
+		unit: "W",
+	}),
 };
 
 // Fallback for unknown states
@@ -140,12 +154,6 @@ export function guessStateConfig(key: string, value: any): StateConfig {
 		if (keyLower.includes("temperature")) {
 			config.role = "value.temperature";
 			config.unit = "°C";
-		} else if (keyLower.includes("power") || keyLower.includes("energy")) {
-			config.role = "value.power";
-
-			if (keyLower.includes("energy")) {
-				config.unit = "kWh";
-			}
 		}
 	} else if (typeof value === "string") {
 		config.type = "string";
