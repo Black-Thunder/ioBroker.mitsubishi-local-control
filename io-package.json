@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mitsubishi-local-control",
-    "version": "1.0.1-alpha.0",
+    "version": "1.0.1",
     "news": {
+      "1.0.1": {
+        "en": "Refactored energy and power state properties",
+        "de": "Refactored Energy und Power State Eigenschaften",
+        "ru": "Рефакторированные свойства энергии и состояния мощности",
+        "pt": "Propriedades do estado de energia e energia refractadas",
+        "nl": "Gerefactoreerde energie- en vermogenstoestandeigenschappen",
+        "fr": "Propriétés de l'état de l'énergie et de la puissance refactorées",
+        "it": "Energia e proprietà dello stato di potenza",
+        "es": "Propiedades de energía y estado de energía refactorizadas",
+        "pl": "Zmienne właściwości energii i stanu mocy",
+        "uk": "Рефакторні енергетичні та енергетичні властивості",
+        "zh-cn": "重构能源和动力状态属性"
+      },
       "1.0.1-alpha.0": {
         "en": "Refactored energy and power state properties",
         "de": "Refactored Energy und Power State Eigenschaften",
