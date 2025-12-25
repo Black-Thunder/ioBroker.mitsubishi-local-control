@@ -226,8 +226,9 @@ class MitsubishiController {
           resolve(newState);
           return newState;
         } catch (err) {
-          this.log.warn(`Failed to send coalesced command: ${err.message}`);
-          reject(err);
+          const error = err instanceof Error ? err : new Error(String(err));
+          this.log.warn(`Failed to send coalesced command: ${error.message}`);
+          reject(error);
         }
       });
       void this.processCommandQueue();
