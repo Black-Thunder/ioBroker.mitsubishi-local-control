@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mitsubishi-local-control",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "news": {
+      "1.0.2": {
+        "en": "Implemented command coalescing and mapped AUTO mode correctly",
+        "de": "Ergänzte Kommando-Koalescing und kartiert AUTO-Modus korrekt",
+        "ru": "Реализовано коалесцирование команд и правильно отображен режим AUTO",
+        "pt": "Comando implementado coalescing e modo AUTO mapeado corretamente",
+        "nl": "Geïmplementeerd commando coalescing en in kaart gebracht AUTO-modus correct",
+        "fr": "Mise en œuvre de la commande de regroupement et de cartographie du mode AUTO correctement",
+        "it": "Comando implementato carbonizzazione e mappato modalità AUTO correttamente",
+        "es": "Aplicación de comando coalescing y mapeado modo AUTO correctamente",
+        "pl": "Wdrożenie komendy koalessing i mapowanie trybu AUTO poprawnie",
+        "uk": "Впроваджено командне вугілля та картований режим АВТО правильно",
+        "zh-cn": "正确连接和映射 AUTO 模式"
+      },
       "1.0.1": {
         "en": "Refactored energy and power state properties",
         "de": "Refactored Energy und Power State Eigenschaften",
