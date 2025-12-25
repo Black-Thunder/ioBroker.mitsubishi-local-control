@@ -209,7 +209,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 	}
 
 	async updateDeviceStates(parsedState: ParsedDeviceState, deviceName: string): Promise<void> {
-		const parsedMac = parsedState.mac.replace(/:/g, "").replace(this.FORBIDDEN_CHARS, "_");
+		const parsedMac = parsedState.mac.replace(/:/g, "").replace(this.FORBIDDEN_CHARS, "");
 		const deviceId = `devices.${parsedMac}`;
 
 		// Generate device object and common states

@@ -195,7 +195,7 @@ class MitsubishiLocalControl extends utils.Adapter {
   }
   async updateDeviceStates(parsedState, deviceName) {
     var _a;
-    const parsedMac = parsedState.mac.replace(/:/g, "").replace(this.FORBIDDEN_CHARS, "_");
+    const parsedMac = parsedState.mac.replace(/:/g, "").replace(this.FORBIDDEN_CHARS, "");
     const deviceId = `devices.${parsedMac}`;
     await this.setObjectNotExistsAsync(`${deviceId}`, {
       type: "device",
