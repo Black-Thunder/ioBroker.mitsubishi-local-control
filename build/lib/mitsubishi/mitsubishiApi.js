@@ -36,13 +36,13 @@ var crypto = __toESM(require("crypto"));
 var import_types = require("./types");
 var import_utils = require("./utils");
 class MitsubishiAPI {
-  log;
+  adapter;
   deviceHostPort;
   encryptionKey;
   http;
-  constructor(deviceHostPort, log, encryptionKey = import_types.STATIC_KEY) {
+  constructor(deviceHostPort, adapter, encryptionKey = import_types.STATIC_KEY) {
     this.deviceHostPort = deviceHostPort;
-    this.log = log;
+    this.adapter = adapter;
     if (typeof encryptionKey === "string") {
       encryptionKey = Buffer.from(encryptionKey, "utf8");
     }
@@ -160,7 +160,7 @@ class MitsubishiAPI {
         const encrypted_response = m == null ? void 0 : m[1];
         if (encrypted_response) {
           if (encrypted_response.length % 4 !== 0) {
-            this.log.error(`Invalid base64 length: ${encrypted_response.length}`);
+            this.adapter.log.error(`Invalid base64 length: ${encrypted_response.length}`);
           }
           const decrypted = this.decryptPayload(encrypted_response);
           return decrypted;
@@ -170,7 +170,7 @@ class MitsubishiAPI {
         lastErr = err;
         if (attempt < maxRetries) {
           const wait = 1e3 * Math.pow(2, attempt);
-          await new Promise((r) => setTimeout(r, wait));
+          await new Promise((r) => this.adapter.setTimeout(r, wait, void 0));
           continue;
         }
         throw lastErr;

@@ -39,7 +39,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 
 		this.devices = (this.config.devices ?? []).map(c => ({
 			...c,
-			controller: MitsubishiController.create(c.ip, this.log),
+			controller: MitsubishiController.create(c.ip, this),
 			mac: undefined,
 		}));
 
@@ -140,7 +140,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 			};
 
 			await poll();
-			device.pollingJob = setInterval(poll, interval);
+			device.pollingJob = this.setInterval(poll, interval);
 		}
 
 		this.log.info(`Started polling all devices every ${this.config.pollingInterval} seconds.`);
@@ -149,7 +149,7 @@ class MitsubishiLocalControl extends utils.Adapter {
 	private stopPolling(): void {
 		this.devices.forEach(c => {
 			if (c.pollingJob) {
-				clearInterval(c.pollingJob);
+				this.clearInterval(c.pollingJob);
 				this.log.debug(`Cleared polling timer for device ${c.name}.`);
 			}
 			c.controller.cleanupController();

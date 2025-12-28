@@ -19,30 +19,30 @@ export class MitsubishiController {
 	public parsedDeviceState: ParsedDeviceState | null = null;
 	public isCommandInProgress = false;
 
-	private log: ioBroker.Logger;
+	private adapter: ioBroker.Adapter;
 	private api: MitsubishiAPI;
 	private readonly mutex = new Mutex();
 	private readonly commandQueue: Array<() => Promise<ParsedDeviceState | undefined>> = [];
 	private isProcessingQueue = false;
 	private profileCode: Buffer[] = [];
 	private pendingChangeset: MitsubishiChangeSet | null = null;
-	private pendingTimer: NodeJS.Timeout | null = null;
+	private pendingTimer: ioBroker.Timeout | undefined = undefined;
 	private readonly coalesceDelayMs = 200;
 
 	static waitTimeAfterCommand = 6000;
 
-	constructor(api: MitsubishiAPI, log: ioBroker.Logger) {
+	constructor(api: MitsubishiAPI, adapter: ioBroker.Adapter) {
 		this.api = api;
-		this.log = log;
+		this.adapter = adapter;
 	}
 
 	public static create(
 		deviceHostPort: string,
-		log: ioBroker.Logger,
+		adapter: ioBroker.Adapter,
 		encryptionKey?: string | Buffer,
 	): MitsubishiController {
-		const api = new MitsubishiAPI(deviceHostPort, log, encryptionKey);
-		return new MitsubishiController(api, log);
+		const api = new MitsubishiAPI(deviceHostPort, adapter, encryptionKey);
+		return new MitsubishiController(api, adapter);
 	}
 
 	public cleanupController(): void {
@@ -204,7 +204,9 @@ export class MitsubishiController {
 				await this.api.sendHexCommand(hex);
 
 				// Wait for device to process the command
-				await new Promise(r => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
+				await new Promise(r =>
+					this.adapter.setTimeout(r, MitsubishiController.waitTimeAfterCommand, undefined),
+				);
 
 				// Fetch fresh status after device has processed
 				const newState = await this.fetchStatus(false);
@@ -239,11 +241,11 @@ export class MitsubishiController {
 
 		// Reset debounce timer
 		if (this.pendingTimer) {
-			clearTimeout(this.pendingTimer);
+			this.adapter.clearTimeout(this.pendingTimer);
 		}
 
 		return new Promise((resolve, reject) => {
-			this.pendingTimer = setTimeout(() => {
+			this.pendingTimer = this.adapter.setTimeout(() => {
 				this.flushPendingChangeset().then(resolve).catch(reject);
 			}, this.coalesceDelayMs);
 		});
@@ -273,7 +275,7 @@ export class MitsubishiController {
 					return newState;
 				} catch (err) {
 					const error = err instanceof Error ? err : new Error(String(err));
-					this.log.warn(`Failed to send coalesced command: ${error.message}`);
+					this.adapter.log.warn(`Failed to send coalesced command: ${error.message}`);
 					reject(error);
 				}
 			});
@@ -297,10 +299,10 @@ export class MitsubishiController {
 						await nextCommand();
 					} catch (error) {
 						// error was already in reject() handled
-						this.log.warn(`Command in queue failed: ${(error as Error).message}`);
+						this.adapter.log.warn(`Command in queue failed: ${(error as Error).message}`);
 					}
 					// Wait after each command to prevent polling conflicts
-					await new Promise(r => setTimeout(r, 500));
+					await new Promise(r => this.adapter.setTimeout(r, 500, undefined));
 				}
 			}
 		} finally {
@@ -370,13 +372,13 @@ export class MitsubishiController {
 
 	private async sendGeneralCommand(state: GeneralStates, controls: Controls): Promise<ParsedDeviceState> {
 		const buf = state.generateGeneralCommand(controls);
-		this.log.debug(`Sending General Command: ${buf.toString("hex")}`);
+		this.adapter.log.debug(`Sending General Command: ${buf.toString("hex")}`);
 		return this.applyHexCommand(buf.toString("hex"));
 	}
 
 	private async sendExtend08Command(state: GeneralStates, controls: Controls08): Promise<ParsedDeviceState> {
 		const buf = state.generateExtend08Command(controls);
-		this.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
+		this.adapter.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
 		return this.applyHexCommand(buf.toString("hex"));
 	}
 

@@ -34,23 +34,23 @@ const xmlParser = new import_fast_xml_parser.XMLParser({
 class MitsubishiController {
   parsedDeviceState = null;
   isCommandInProgress = false;
-  log;
+  adapter;
   api;
   mutex = new import_async_mutex.Mutex();
   commandQueue = [];
   isProcessingQueue = false;
   profileCode = [];
   pendingChangeset = null;
-  pendingTimer = null;
+  pendingTimer = void 0;
   coalesceDelayMs = 200;
   static waitTimeAfterCommand = 6e3;
-  constructor(api, log) {
+  constructor(api, adapter) {
     this.api = api;
-    this.log = log;
+    this.adapter = adapter;
   }
-  static create(deviceHostPort, log, encryptionKey) {
-    const api = new import_mitsubishiApi.MitsubishiAPI(deviceHostPort, log, encryptionKey);
-    return new MitsubishiController(api, log);
+  static create(deviceHostPort, adapter, encryptionKey) {
+    const api = new import_mitsubishiApi.MitsubishiAPI(deviceHostPort, adapter, encryptionKey);
+    return new MitsubishiController(api, adapter);
   }
   cleanupController() {
     this.api.close();
@@ -173,7 +173,9 @@ class MitsubishiController {
       try {
         this.isCommandInProgress = true;
         await this.api.sendHexCommand(hex);
-        await new Promise((r) => setTimeout(r, MitsubishiController.waitTimeAfterCommand));
+        await new Promise(
+          (r) => this.adapter.setTimeout(r, MitsubishiController.waitTimeAfterCommand, void 0)
+        );
         const newState = await this.fetchStatus(false);
         return newState;
       } finally {
@@ -199,10 +201,10 @@ class MitsubishiController {
       this.pendingChangeset.merge(changeset);
     }
     if (this.pendingTimer) {
-      clearTimeout(this.pendingTimer);
+      this.adapter.clearTimeout(this.pendingTimer);
     }
     return new Promise((resolve, reject) => {
-      this.pendingTimer = setTimeout(() => {
+      this.pendingTimer = this.adapter.setTimeout(() => {
         this.flushPendingChangeset().then(resolve).catch(reject);
       }, this.coalesceDelayMs);
     });
@@ -227,7 +229,7 @@ class MitsubishiController {
           return newState;
         } catch (err) {
           const error = err instanceof Error ? err : new Error(String(err));
-          this.log.warn(`Failed to send coalesced command: ${error.message}`);
+          this.adapter.log.warn(`Failed to send coalesced command: ${error.message}`);
           reject(error);
         }
       });
@@ -246,9 +248,9 @@ class MitsubishiController {
           try {
             await nextCommand();
           } catch (error) {
-            this.log.warn(`Command in queue failed: ${error.message}`);
+            this.adapter.log.warn(`Command in queue failed: ${error.message}`);
           }
-          await new Promise((r) => setTimeout(r, 500));
+          await new Promise((r) => this.adapter.setTimeout(r, 500, void 0));
         }
       }
     } finally {
@@ -307,12 +309,12 @@ class MitsubishiController {
   }
   async sendGeneralCommand(state, controls) {
     const buf = state.generateGeneralCommand(controls);
-    this.log.debug(`Sending General Command: ${buf.toString("hex")}`);
+    this.adapter.log.debug(`Sending General Command: ${buf.toString("hex")}`);
     return this.applyHexCommand(buf.toString("hex"));
   }
   async sendExtend08Command(state, controls) {
     const buf = state.generateExtend08Command(controls);
-    this.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
+    this.adapter.log.debug(`Sending Extend08 Command: ${buf.toString("hex")}`);
     return this.applyHexCommand(buf.toString("hex"));
   }
   async enableEchonet() {

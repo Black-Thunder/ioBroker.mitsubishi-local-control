@@ -6,14 +6,14 @@ import { KEY_SIZE, STATIC_KEY } from "./types";
 import { padIso7816, unpadIso7816 } from "./utils";
 
 export class MitsubishiAPI {
-	private log: ioBroker.Logger;
+	private adapter: ioBroker.Adapter;
 	private deviceHostPort: string;
 	private encryptionKey: Buffer;
 	private http: AxiosInstance;
 
-	constructor(deviceHostPort: string, log: ioBroker.Logger, encryptionKey: string | Buffer = STATIC_KEY) {
+	constructor(deviceHostPort: string, adapter: ioBroker.Adapter, encryptionKey: string | Buffer = STATIC_KEY) {
 		this.deviceHostPort = deviceHostPort;
-		this.log = log;
+		this.adapter = adapter;
 		if (typeof encryptionKey === "string") {
 			encryptionKey = Buffer.from(encryptionKey, "utf8");
 		}
@@ -177,7 +177,7 @@ export class MitsubishiAPI {
 
 				if (encrypted_response) {
 					if (encrypted_response.length % 4 !== 0) {
-						this.log.error(`Invalid base64 length: ${encrypted_response.length}`);
+						this.adapter.log.error(`Invalid base64 length: ${encrypted_response.length}`);
 					}
 
 					const decrypted = this.decryptPayload(encrypted_response);
@@ -188,7 +188,7 @@ export class MitsubishiAPI {
 				lastErr = err;
 				if (attempt < maxRetries) {
 					const wait = 1000 * Math.pow(2, attempt); // backoff_factor=1 -> 1s,2s,4s...
-					await new Promise(r => setTimeout(r, wait));
+					await new Promise(r => this.adapter.setTimeout(r, wait, undefined));
 					continue;
 				}
 				throw lastErr;

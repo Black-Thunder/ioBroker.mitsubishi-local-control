@@ -1,7 +1,7 @@
 {
   "version": 3,
   "sources": ["../../../src/lib/mitsubishi/device.ts"],
-  "sourcesContent": ["import type { MitsubishiController } from \"./mitsubishiController\";\n\ninterface Device {\n\tname: string;\n\tip: string;\n\tmac: string | undefined;\n\tcontroller: MitsubishiController;\n\tpollingJob?: NodeJS.Timeout;\n}\n\nexport type { Device };\n"],
+  "sourcesContent": ["import type { MitsubishiController } from \"./mitsubishiController\";\n\ninterface Device {\n\tname: string;\n\tip: string;\n\tmac: string | undefined;\n\tcontroller: MitsubishiController;\n\tpollingJob?: ioBroker.Interval | undefined;\n}\n\nexport type { Device };\n"],
   "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
   "names": []
 }

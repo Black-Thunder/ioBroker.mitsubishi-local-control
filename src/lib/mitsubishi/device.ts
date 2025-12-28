@@ -5,7 +5,7 @@ interface Device {
 	ip: string;
 	mac: string | undefined;
 	controller: MitsubishiController;
-	pollingJob?: NodeJS.Timeout;
+	pollingJob?: ioBroker.Interval | undefined;
 }
 
 export type { Device };
