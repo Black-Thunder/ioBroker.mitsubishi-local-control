@@ -83,7 +83,7 @@ class MitsubishiAPI {
   }
   /**
    * Decrypt base64(iv + ciphertext) using AES-CBC + ISO7816 unpad fallback.
-   * Mirrors Python behaviour: try iso7816 unpad; on failure strip trailing \x00;
+   * Try iso7816 unpad; on failure strip trailing \x00;
    * then try to decode UTF-8; on UnicodeDecodeError search for closing tags and fallback to ignore errors.
    */
   decryptPayload(payload_b64) {
@@ -130,7 +130,7 @@ class MitsubishiAPI {
   }
   /**
    * Make HTTP request to /smart endpoint.
-   * Mirrors Python's make_request: encrypt payload, wrap in <ESV>..</ESV>, POST, parse response, decrypt.
+   * Encrypt payload, wrap in <ESV>..</ESV>, POST, parse response, decrypt.
    */
   async makeRequest(payload_xml) {
     const encrypted_payload = this.encryptPayload(payload_xml);
@@ -150,12 +150,7 @@ class MitsubishiAPI {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const resp = await this.http.post(url, request_body, { headers, timeout: 2e3 });
-        if (resp.status < 200 || resp.status >= 300) {
-          const e = new Error(`HTTP Error ${resp.status}`);
-          e.status = resp.status;
-          e.body = resp.data;
-          throw e;
-        }
+        this.raiseForStatus(resp);
         const m = String(resp.data).match(/<ESV>\s*([^<]+)\s*<\/ESV>/i);
         const encrypted_response = m == null ? void 0 : m[1];
         if (encrypted_response) {
@@ -169,7 +164,7 @@ class MitsubishiAPI {
       } catch (err) {
         lastErr = err;
         if (attempt < maxRetries) {
-          const wait = 1e3 * Math.pow(2, attempt);
+          const wait = attempt === 0 ? 0 : 1e3 * Math.pow(2, attempt - 1);
           await new Promise((r) => this.adapter.setTimeout(r, wait, void 0));
           continue;
         }
@@ -177,6 +172,14 @@ class MitsubishiAPI {
       }
     }
     throw lastErr;
+  }
+  raiseForStatus(resp) {
+    if (resp.status >= 400 && resp.status < 600) {
+      const err = new Error(`${resp.status} ${resp.status >= 500 ? "Server" : "Client"} Error`);
+      err.status = resp.status;
+      err.body = resp.data;
+      throw err;
+    }
   }
   sendRebootRequest() {
     return this.makeRequest("<CSV><RESET></RESET></CSV>");

@@ -22,8 +22,6 @@ export class MitsubishiAPI {
 		}
 		this.encryptionKey = encryptionKey.subarray(0, KEY_SIZE);
 
-		// Axios instance; note Python used requests.Session() + Retry adapter.
-		// We'll implement retries in make_request similarly.
 		this.http = axios.create({
 			timeout: 2000,
 			headers: {
@@ -65,7 +63,7 @@ export class MitsubishiAPI {
 
 	/**
 	 * Decrypt base64(iv + ciphertext) using AES-CBC + ISO7816 unpad fallback.
-	 * Mirrors Python behaviour: try iso7816 unpad; on failure strip trailing \x00;
+	 * Try iso7816 unpad; on failure strip trailing \x00;
 	 * then try to decode UTF-8; on UnicodeDecodeError search for closing tags and fallback to ignore errors.
 	 */
 	decryptPayload(payload_b64: string): string {
@@ -83,7 +81,7 @@ export class MitsubishiAPI {
 		try {
 			decrypted = Buffer.concat([decipher.update(encrypted_data), decipher.final()]);
 		} catch (e) {
-			// Propagate error similar to Python (will be caught higher-level)
+			// Propagate error (will be caught higher-level)
 			throw new Error(`Decryption failed: ${(e as Error).message}`);
 		}
 
@@ -105,11 +103,11 @@ export class MitsubishiAPI {
 			const result = decrypted_clean.toString("utf8");
 			return result;
 		} catch {
-			// Node's Buffer.toString won't throw UnicodeDecodeError like Python; but we'll follow fallback logic.
+			// Node's Buffer.toString won't throw UnicodeDecodeError; but we'll follow fallback logic.
 			// Attempt to find closing tags in raw bytes, then decode slice.
 		}
 
-		// Try to find closing XML tags like Python did
+		// Try to find closing XML tags
 		const xml_end_patterns = [Buffer.from("</LSV>"), Buffer.from("</CSV>"), Buffer.from("</ESV>")];
 		for (const pattern of xml_end_patterns) {
 			const pos = decrypted_clean.indexOf(pattern);
@@ -133,7 +131,7 @@ export class MitsubishiAPI {
 
 	/**
 	 * Make HTTP request to /smart endpoint.
-	 * Mirrors Python's make_request: encrypt payload, wrap in <ESV>..</ESV>, POST, parse response, decrypt.
+	 * Encrypt payload, wrap in <ESV>..</ESV>, POST, parse response, decrypt.
 	 */
 	async makeRequest(payload_xml: string): Promise<string> {
 		// Encrypt
@@ -161,16 +159,9 @@ export class MitsubishiAPI {
 		for (let attempt = 0; attempt <= maxRetries; attempt++) {
 			try {
 				const resp = await this.http.post(url, request_body, { headers, timeout: 2000 });
-				// emulate response.raise_for_status()
-				if (resp.status < 200 || resp.status >= 300) {
-					const e = new Error(`HTTP Error ${resp.status}`);
-					(e as any).status = resp.status;
-					(e as any).body = resp.data;
-					throw e;
-				}
+				this.raiseForStatus(resp);
 
 				// Parse XML root and get root.text like ElementTree.fromstring(...).text
-				// Python: root = ET.fromstring(response.text); encrypted_response = root.text
 				// Here extract inner text between the outermost tag, e.g. <ESV>...</ESV>
 				const m = String(resp.data).match(/<ESV>\s*([^<]+)\s*<\/ESV>/i);
 				const encrypted_response = m?.[1];
@@ -187,7 +178,7 @@ export class MitsubishiAPI {
 			} catch (err) {
 				lastErr = err;
 				if (attempt < maxRetries) {
-					const wait = 1000 * Math.pow(2, attempt); // backoff_factor=1 -> 1s,2s,4s...
+					const wait = attempt === 0 ? 0 : 1000 * Math.pow(2, attempt - 1); // backoff_factor=1 -> 0s,1s,2s,4s...
 					await new Promise(r => this.adapter.setTimeout(r, wait, undefined));
 					continue;
 				}
@@ -195,6 +186,20 @@ export class MitsubishiAPI {
 			}
 		}
 		throw lastErr;
+	}
+
+	private raiseForStatus(resp: axios.AxiosResponse): void {
+		if (resp.status >= 400 && resp.status < 600) {
+			const err = new Error(`${resp.status} ${resp.status >= 500 ? "Server" : "Client"} Error`) as Error & {
+				status?: number;
+				body?: unknown;
+			};
+
+			err.status = resp.status;
+			err.body = resp.data;
+
+			throw err;
+		}
 	}
 
 	sendRebootRequest(): Promise<string> {

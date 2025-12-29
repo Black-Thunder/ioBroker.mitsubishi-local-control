@@ -118,7 +118,7 @@ export class MitsubishiController {
 			this.parsedDeviceState.appVersion = appVer.toString();
 		}
 
-		// ---- 4: Extract PROFILECODE values (two possible locations like Python) ----
+		// ---- 4: Extract PROFILECODE values (two possible locations) ----
 		this.profileCode = [];
 
 		const profiles1 = this.extractTagList(rootObj, ["PROFILECODE", "DATA", "VALUE"]);
@@ -130,7 +130,7 @@ export class MitsubishiController {
 			try {
 				this.profileCode.push(Buffer.from(hex, "hex"));
 			} catch {
-				// ignore malformed entries exactly like python would
+				// ignore malformed entries
 			}
 		}
 

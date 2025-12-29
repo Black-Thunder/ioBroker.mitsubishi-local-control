@@ -1,7 +1,6 @@
 import { KEY_SIZE } from "./types";
 
 export function padIso7816(input: Buffer, blockSize = KEY_SIZE): Buffer {
-	// Python's Crypto.Util.Padding.pad(..., "iso7816")
 	const padLen = blockSize - (input.length % blockSize);
 	const out = Buffer.alloc(input.length + padLen);
 	input.copy(out, 0);
@@ -23,7 +22,7 @@ export function unpadIso7816(padded: Buffer): Buffer {
 	return padded.subarray(0, i);
 }
 
-/** calc FCC as in Python: 0x100 - (sum(payload[0:20]) % 0x100)  then mod 0x100 */
+/** calc FCC: 0x100 - (sum(payload[0:20]) % 0x100)  then mod 0x100 */
 export function calcFcc(payload: Buffer): number {
 	const slice = payload.subarray(0, 20);
 	const sum = slice.reduce((s, b) => s + b, 0);
