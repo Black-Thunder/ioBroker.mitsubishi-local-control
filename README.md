@@ -40,6 +40,10 @@ The **mitsubishi-local-control** adapter integrates Mitsubishi Electric air cond
 	### **WORK IN PROGRESS**
 -->
 
+### **WORK IN PROGRESS**
+
+- (Black-Thunder) Dependencies were updated
+
 ### 1.0.3 (2025-12-29)
 
 - (Black-Thunder) Cleaned up some code
