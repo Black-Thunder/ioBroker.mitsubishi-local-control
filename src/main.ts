@@ -212,6 +212,15 @@ class MitsubishiLocalControl extends utils.Adapter {
 		const parsedMac = parsedState.mac.replace(/:/g, "").replace(this.FORBIDDEN_CHARS, "");
 		const deviceId = `devices.${parsedMac}`;
 
+		// Generate devices folder
+		await this.setObjectNotExistsAsync("devices", {
+			type: "folder",
+			common: {
+				name: "Devices",
+			},
+			native: {},
+		});
+
 		// Generate device object and common states
 		await this.setObjectNotExistsAsync(`${deviceId}`, {
 			type: "device",
