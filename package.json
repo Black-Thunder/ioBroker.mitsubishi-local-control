@@ -30,7 +30,7 @@
     "@iobroker/adapter-core": "^3.3.2",
     "async-mutex": "^0.5.0",
     "axios": "^1.13.2",
-    "fast-xml-parser": "^5.3.3"
+    "fast-xml-parser": "^5.3.4"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^5.0.0",
