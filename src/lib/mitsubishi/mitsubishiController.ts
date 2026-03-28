@@ -1,5 +1,5 @@
 import { Mutex } from "async-mutex";
-import { Buffer } from "buffer";
+import { Buffer } from "node:buffer";
 import { XMLParser } from "fast-xml-parser";
 
 import { MitsubishiAPI } from "./mitsubishiApi";
