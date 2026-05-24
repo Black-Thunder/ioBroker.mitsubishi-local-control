@@ -25,7 +25,7 @@ export class MitsubishiChangeSet {
 		if (operationMode === OperationMode.AUTO) {
 			this.desiredState.operationMode = 8 as number;
 		} else {
-			this.desiredState.operationMode = operationMode as number;
+			this.desiredState.operationMode = operationMode;
 		}
 
 		this.changes |= Controls.OperationMode;

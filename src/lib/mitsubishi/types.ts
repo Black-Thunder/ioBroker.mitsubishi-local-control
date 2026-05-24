@@ -274,19 +274,19 @@ export class GeneralStates {
 		body[2] = 0x30;
 		body[3] = 0x10;
 		body[4] = 0x01;
-		const ctrl = (controls as unknown as number) | (Controls.OutsideControl as unknown as number);
+		const ctrl = controls | Controls.OutsideControl;
 		body.writeUInt16BE(ctrl & 0xffff, 5);
 		body[7] = this.power ? 1 : 0;
 		body[8] = typeof this.operationMode === "number" ? this.operationMode : Number(this.operationMode);
 		body[9] = 31 - Math.floor(this.temperature);
-		body[10] = (this.fanSpeed as unknown as number) & 0xff;
-		body[11] = (this.vaneVerticalDirection as unknown as number) & 0xff;
+		body[10] = this.fanSpeed & 0xff;
+		body[11] = this.vaneVerticalDirection & 0xff;
 		body[12] = 0;
 		body[13] = 0;
 		body[14] = 0;
 		body[15] = this.remoteLock & 0xff;
 		body[16] = 0;
-		body[17] = (this.vaneHorizontalDirection as unknown as number) & 0xff;
+		body[17] = this.vaneHorizontalDirection & 0xff;
 		body[18] = this.targetTemperature !== null ? (0x80 + Math.floor(this.targetTemperature * 2)) & 0xff : 0x00;
 		body[19] = 0x41;
 
@@ -301,7 +301,7 @@ export class GeneralStates {
 		body[2] = 0x30;
 		body[3] = 0x10;
 		body[4] = 0x08;
-		body[5] = (controls08 as unknown as number) & 0xff;
+		body[5] = controls08 & 0xff;
 		body[8] = controls08 & Controls08.Dehum ? this.dehumidifierLevel & 0xff : 0;
 		body[9] = this.powerSaving ? 0x0a : 0x00;
 		body[10] = controls08 & Controls08.WindAndWindBreak ? this.windAndWindBreakDirect & 0xff : 0;
