@@ -27,7 +27,7 @@
 		"node": ">= 22"
 	},
 	"dependencies": {
-		"@iobroker/adapter-core": "^3.4.1",
+		"@iobroker/adapter-core": "^3.4.3",
 		"async-mutex": "^0.5.0",
 		"axios": "^1.18.1",
 		"fast-xml-parser": "^5.10.1"
