@@ -39,8 +39,7 @@ The **mitsubishi-local-control** adapter integrates Mitsubishi Electric air cond
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 2.0.0 (2026-10-02)
 
 - (copilot) Adapter requires node.js >= 22 now
 - (Black-Thunder) Dependencies were updated
@@ -61,18 +60,6 @@ The **mitsubishi-local-control** adapter integrates Mitsubishi Electric air cond
 ### 1.0.3 (2025-12-29)
 
 - (Black-Thunder) Cleaned up some code
-
-### 1.0.2 (2025-12-25)
-
-- (Black-Thunder) Implemented command coalescing and mapped AUTO mode correctly
-
-### 1.0.1 (2025-12-21)
-
-- (Black-Thunder) Refactored energy and power state properties
-
-### 1.0.0 (2025-12-18)
-
-- (Black-Thunder) initial release
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 
