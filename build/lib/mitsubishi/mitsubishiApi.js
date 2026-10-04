@@ -165,7 +165,7 @@ class MitsubishiAPI {
         lastErr = err;
         if (attempt < maxRetries) {
           const wait = attempt === 0 ? 0 : 1e3 * Math.pow(2, attempt - 1);
-          await new Promise((r) => this.adapter.setTimeout(r, wait, void 0));
+          await this.adapter.delay(wait);
           continue;
         }
         throw lastErr;
