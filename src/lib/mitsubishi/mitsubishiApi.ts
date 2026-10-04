@@ -179,7 +179,7 @@ export class MitsubishiAPI {
 				lastErr = err;
 				if (attempt < maxRetries) {
 					const wait = attempt === 0 ? 0 : 1000 * Math.pow(2, attempt - 1); // backoff_factor=1 -> 0s,1s,2s,4s...
-					await new Promise(r => this.adapter.setTimeout(r, wait, undefined));
+					await this.adapter.delay(wait);
 					continue;
 				}
 				throw lastErr;
