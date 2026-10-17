@@ -1,4 +1,5 @@
 # Older changes
+
 ## 1.0.2 (2025-12-25)
 
 - (Black-Thunder) Implemented command coalescing and mapped AUTO mode correctly

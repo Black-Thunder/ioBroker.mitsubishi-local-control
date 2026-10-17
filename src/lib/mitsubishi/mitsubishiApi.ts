@@ -178,8 +178,8 @@ export class MitsubishiAPI {
 			} catch (err) {
 				lastErr = err;
 				if (attempt < maxRetries) {
-					const wait = attempt === 0 ? 0 : 1000 * Math.pow(2, attempt - 1); // backoff_factor=1 -> 0s,1s,2s,4s...
-					await this.adapter.delay(wait);
+					const backoffMs = attempt === 0 ? 0 : 1000 * Math.pow(2, attempt - 1); // backoff_factor=1 -> 0s,1s,2s,4s...
+					await this.adapter.delay(backoffMs);
 					continue;
 				}
 				throw lastErr;
